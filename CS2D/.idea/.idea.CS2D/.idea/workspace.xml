@@ -19,15 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="aed4878d-6d98-441a-9717-bd53460cb4a3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Scene/SimulationTest.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scene/SimulationTest.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/Commands.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/Commands.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/CubeEntity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/CubeEntity.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/CubeEntity.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/CubeEntity.cs.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/Snapshot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/Snapshot.cs" afterDir="false" />
-    </list>
+    <list default="true" id="aed4878d-6d98-441a-9717-bd53460cb4a3" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -37,9 +29,9 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Tests/CubeEntity.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/4CD14385-55E6-4C0E-AEDA-2393D3C9CF4A/09/41ef48f9/Object.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/4CD14385-55E6-4C0E-AEDA-2393D3C9CF4A/09/41ef48f9/Object.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Tests/CubeEntity.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -95,6 +87,7 @@
       <updated>1599171649328</updated>
       <workItem from="1599171664305" duration="5316000" />
       <workItem from="1599772631144" duration="14046000" />
+      <workItem from="1599788739339" duration="175000" />
     </task>
     <servers />
   </component>
