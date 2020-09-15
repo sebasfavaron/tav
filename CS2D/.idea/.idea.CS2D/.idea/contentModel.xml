@@ -39,6 +39,8 @@
             <e p="ConnectionTest.cs" t="Include" />
             <e p="CubeEntity.cs" t="Include" />
             <e p="MyLogHandler.cs" t="Include" />
+            <e p="SimulationClient.cs" t="Include" />
+            <e p="SimulationServer.cs" t="Include" />
             <e p="SimulationTest.cs" t="Include" />
             <e p="Snapshot.cs" t="Include" />
           </e>

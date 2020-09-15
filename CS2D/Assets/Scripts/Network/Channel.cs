@@ -13,9 +13,12 @@ public class Channel {
 	private UdpClient udpClient;
 	private System.Object bufferLock = new System.Object();
 	private List<Packet> packetBuffer = new List<Packet>();
+	public int port;
 
 	public Channel(string ip, int receivePort, int sendPort) {
-		try {
+		try
+		{
+			port = -1;
 			udpClient = new UdpClient(receivePort);
 			if (ip != null) {
 				udpClient.Connect(new IPEndPoint(IPAddress.Parse(ip), sendPort));
@@ -28,18 +31,20 @@ public class Channel {
 	}
 
     public Channel(int port) {
-        try {
+        try
+        {
+	        this.port = port;
             udpClient = new UdpClient(port);
             Thread receiveThread = new Thread(Receive);
             receiveThread.Start();
         } catch (Exception e) {
-            Debug.Log("could not connect socket: " + e.Message);
+            //Debug.Log("could not connect socket: " + e.Message);
         }
     }
 
 	public void Disconnect() {
 		if (udpClient != null) {
-			Debug.Log("socket closed");
+			//Debug.Log("socket closed");
 			udpClient.Close();
 			udpClient = null;
 		}
@@ -70,10 +75,10 @@ public class Channel {
 				}
 			} catch (SocketException e) {
 				if (e.ErrorCode != CONNECTION_CLOSED_CODE) {
-					Debug.Log("SocketException while reading from socket: " + e + " (" + e.ErrorCode + ")");
+					//Debug.Log("SocketException while reading from socket: " + e + " (" + e.ErrorCode + ")");
 				}
 			} catch (Exception e) {
-				Debug.Log("Exception while reading from socket: " + e);
+				//Debug.Log("Exception while reading from socket: " + e);
 			}
 		}
 	}

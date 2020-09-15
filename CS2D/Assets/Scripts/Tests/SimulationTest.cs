@@ -41,9 +41,11 @@ public class SimulationTest : MonoBehaviour
      * CubeEntity
      */
 
-    private Channel channel;
-    private Channel channel2;
-    private Channel channel3;
+    private Channel channel;  // Send data (position of all players) to client
+    private Channel channel2;  // Receive input from client
+    private Channel channel3;  // Send number of inputs processed (ack)
+    private Channel playerJoinedChannel;  // Server (where it sends new playerJoined events)
+    private Channel joinChannel;  // Server (where it listens for new join events)
 
     private float accum = 0f;
     private float accum2 = 0f;
@@ -62,38 +64,44 @@ public class SimulationTest : MonoBehaviour
 
     List<Snapshot> interpolationBuffer = new List<Snapshot>();  // Client
     List<Commands> commandServer = new List<Commands>();  // Client
+    private int clientId;  // Client
     
-    private int amountOfPlayers = 2;  // Both
+    private int amountOfPlayers = 2;  // Both (but harcoded value to be erased)
 
     // Start is called before the first frame update
     void Start() {
-        StartClient();
         StartServer();
+        StartClient();
     }
 
     private void StartClient()  // Client
     {
+        this.clientId = -1;
         cubeEntitiesClient = new List<CubeEntity>();
-        for (int i = 0; i < amountOfPlayers; i++)
+        /*for (int i = 0; i < amountOfPlayers; i++)
         {
             var clientCube = Instantiate(clientCubePrefab, new Vector3(i, 0, 0), Quaternion.identity);
             clientCube.transform.parent = null;
             cubeEntitiesClient.Add(new CubeEntity(clientCube, i));
-        }
+        }*/
+
+        StartCoroutine(Join());
     }
 
     private void StartServer()  // Server
     {
         cubeEntitiesServer = new List<CubeEntity>();
-        for (int i = 0; i < amountOfPlayers; i++)
+        /*for (int i = 0; i < amountOfPlayers; i++)
         {
             var serverCube = Instantiate(serverCubePrefab, new Vector3(i, 0, 0), Quaternion.identity);
             serverCube.transform.parent = null;
             cubeEntitiesServer.Add(new CubeEntity(serverCube, i));
-        }
-        channel = new Channel(9000);  // Send data (position from all players) to client
-        channel2 = new Channel(9001);  // Receive input from client
-        channel3 = new Channel(9002);  // Send number of inputs processed (ack)
+        }*/
+        channel = new Channel(9000);
+        channel2 = new Channel(9001);
+        channel3 = new Channel(9002);
+        playerJoinedChannel = new Channel(9003);
+        joinChannel = new Channel(9004);
     }
 
     private void OnPlayerJoin()  // Server
@@ -136,11 +144,7 @@ public class SimulationTest : MonoBehaviour
             var snapshot = new Snapshot(packetNumber, cubeEntitiesServer);
             snapshot.Serialize(packet.buffer);
             packet.buffer.Flush();
-            string serverIP = "127.0.0.1";
-            int port = 9000;
-            var remoteEp = new IPEndPoint(IPAddress.Parse(serverIP), port);
-            channel.Send(packet, remoteEp);
-            packet.Free();
+            SendPacket(packet, channel);
             
             // Restart accum
             accum -= sendRate;
@@ -161,7 +165,8 @@ public class SimulationTest : MonoBehaviour
                 force += commands.down ? Vector3.back * 2 : Vector3.zero;
                 force += commands.left ? Vector3.left * 2 : Vector3.zero;
                 force += commands.right ? Vector3.right * 2 : Vector3.zero;
-                cubeEntitiesServer[0].cubeGameObject.GetComponent<Rigidbody>().AddForceAtPosition(force, Vector3.zero, ForceMode.Impulse);
+                var myCube = cubeEntitiesClient.Find(c => c.id == 123);  // Dont do this every time, store a reference
+                myCube.cubeGameObject.GetComponent<Rigidbody>().AddForceAtPosition(force, Vector3.zero, ForceMode.Impulse);
 
                 max = commands.time;
             }
@@ -170,16 +175,52 @@ public class SimulationTest : MonoBehaviour
             var packet3 = Packet.Obtain();
             packet3.buffer.PutInt(max);
             packet3.buffer.Flush();
-            string serverIP = "127.0.0.1";
-            int port = 9002;
-            var remoteEp = new IPEndPoint(IPAddress.Parse(serverIP), port);
-            channel.Send(packet3, remoteEp);
-            packet3.Free();
+            SendPacket(packet3, channel3);
         }
+        
+        //receive joins
+        Packet joinPacket;
+        while ((joinPacket = joinChannel.GetPacket()) != null)
+        {
+            print("server: got join packet");
+            var id = joinPacket.buffer.GetInt();
+            
+            //  Make sure id is unique to avoid collisions (cant change id yet because the client is listening for his own id, needs different approach)
+            /*var idAlreadyUsed = true;
+            while (idAlreadyUsed)
+            {
+                idAlreadyUsed = false;
+                foreach (var cube in cubeEntitiesServer)
+                {
+                    if (cube.id == id)
+                    {
+                        idAlreadyUsed = true;
+                        id = Random.Range(0, 999999);                        
+                        break;
+                    }   
+                }
+            }
+            */
+
+            PlayerJoined(id);
+        }
+    }
+    
+    private void PlayerJoined(int id)  // Server
+    {
+        var serverCube = Instantiate(serverCubePrefab, new Vector3(id, 0, 0), Quaternion.identity);
+        serverCube.transform.parent = null;
+        cubeEntitiesServer.Add(new CubeEntity(serverCube, id));
+
+        Packet playerJoinedPacket = Packet.Obtain();
+        playerJoinedPacket.buffer.PutInt(id);
+        playerJoinedPacket.buffer.Flush();
+        SendPacket(playerJoinedPacket, playerJoinedChannel);
     }
 
     private void UpdateClient()  // Client
     {
+        if(clientId < 0) return;  // skip until you have a valid id (maybe not necessary)
         
         //delete from list
         Packet packet3; 
@@ -224,12 +265,8 @@ public class SimulationTest : MonoBehaviour
             }
             packet2.buffer.Flush();
 
-            string serverIP = "127.0.0.1";
-            int port = 9001;
-            var remoteEp = new IPEndPoint(IPAddress.Parse(serverIP), port);
-            channel.Send(packet2, remoteEp);
-            packet2.Free();
-            
+            SendPacket(packet2, channel2);
+
             accum2 -= sendRate;
         }
 
@@ -258,7 +295,15 @@ public class SimulationTest : MonoBehaviour
             Interpolate();
         }
     }
-    
+
+    private void SendPacket(Packet packet, Channel sendChannel)
+    {
+        string serverIP = "127.0.0.1";
+        var remoteEp = new IPEndPoint(IPAddress.Parse(serverIP), sendChannel.port);
+        sendChannel.Send(packet, remoteEp);
+        packet.Free();
+    }
+
     private void ReadInput()  // Client
     {
         var timeout = Time.time + 2;
@@ -275,9 +320,49 @@ public class SimulationTest : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.C))
         {
             connected = true;
+            StartCoroutine(Join());
             channel2 = new Channel(9001);
             channel3 = new Channel(9002);
         }
+    }
+
+    IEnumerator Join()
+    {
+        var joinPacket = Packet.Obtain();
+        
+        // send id
+        var id = 123; //Random.Range(0, 999999);  // Warning: on disconnect/connect the player gets a new id (potentially dangerous, maybe send old id)
+        joinPacket.buffer.PutInt(id);
+        joinPacket.buffer.Flush();
+        SendPacket(joinPacket, joinChannel);
+        joinChannel.Disconnect();
+        
+        // wait for confirmation
+        var ownIdReceived = false;
+        while (!ownIdReceived)
+        {
+            Packet playerJoinedPacket = playerJoinedChannel.GetPacket();
+            if (playerJoinedPacket == null)
+            {
+                yield return new WaitForSeconds(1);
+                print("nope");
+                continue;
+            }
+            print("got one");
+
+            var receivedId = playerJoinedPacket.buffer.GetInt();
+
+            var clientCube = Instantiate(clientCubePrefab, new Vector3(Random.Range(1,5), Random.Range(1,5), Random.Range(1,5)), Quaternion.identity);
+            clientCube.transform.parent = null;
+            cubeEntitiesClient.Add(new CubeEntity(clientCube, receivedId));
+            if (receivedId == id)
+            {
+                print("got mine!");
+                ownIdReceived = true;
+            }
+        }
+
+        this.clientId = id;
     }
 
     private void Interpolate()  // Client

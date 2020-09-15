@@ -79,6 +79,8 @@
      <Compile Include="Assets\Scripts\Tests\ConnectionTest.cs" />
      <Compile Include="Assets\Scripts\Tests\CubeEntity.cs" />
      <Compile Include="Assets\Scripts\Tests\MyLogHandler.cs" />
+     <Compile Include="Assets\Scripts\Tests\SimulationClient.cs" />
+     <Compile Include="Assets\Scripts\Tests\SimulationServer.cs" />
      <Compile Include="Assets\Scripts\Tests\SimulationTest.cs" />
      <Compile Include="Assets\Scripts\Tests\Snapshot.cs" />
      <Compile Include="Assets\Scripts\Utils\GameObjectPool.cs" />
@@ -89,31 +91,31 @@
      <Compile Include="Assets\Scripts\Utils\PoolObject.cs" />
      <Compile Include="Assets\Scripts\Utils\Singleton.cs" />
  <Reference Include="Unity.Timeline.Editor">
- <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav/CS2D/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
  </Reference>
  <Reference Include="Unity.VSCode.Editor">
- <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav/CS2D/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
  </Reference>
  <Reference Include="Unity.TextMeshPro.Editor">
- <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav/CS2D/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.UI">
- <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav/CS2D/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
  </Reference>
  <Reference Include="Unity.Timeline">
- <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav/CS2D/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
  </Reference>
  <Reference Include="Unity.CollabProxy.Editor">
- <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav/CS2D/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
  </Reference>
  <Reference Include="Unity.Rider.Editor">
- <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav/CS2D/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
  </Reference>
  <Reference Include="Unity.TextMeshPro">
- <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav/CS2D/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.UI">
- <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav/CS2D/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.AIModule">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2019.2.12f1/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
