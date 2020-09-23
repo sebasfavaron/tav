@@ -45,7 +45,7 @@ public class SimulationClient : MonoBehaviour
             cubeEntitiesClient.Add(new CubeEntity(clientCube, id));    
         }*/
         //enabled = false;
-        clientId = 123;
+        clientId = Random.Range(0, 1000000);
     }
 
     // Update is called once per frame
@@ -59,7 +59,7 @@ public class SimulationClient : MonoBehaviour
                 Join();
             }
             
-            // Still check this for new players joining
+            // Still check this every now and then for new players joining
             ConfirmJoin();
         }
         if (!connected || tempDisconnect)
@@ -167,7 +167,6 @@ public class SimulationClient : MonoBehaviour
         var joinPacket = Packet.Obtain();
 
         // send id
-        //clientId = Random.Range(0, 999999);  // Warning: on disconnect/connect the player gets a new id (potentially dangerous, maybe send old id)
         joinPacket.buffer.PutInt(clientId);
         joinPacket.buffer.Flush();
         fakeChannel.Send(joinPacket, FakeChannel.ChannelType.JOIN);
@@ -183,7 +182,6 @@ public class SimulationClient : MonoBehaviour
             if (!cubeEntitiesClient.Exists(c => c.id == receivedId))
             {
                 var clientCube = Instantiate(clientCubePrefab, new Vector3(), Quaternion.identity);
-                print($"pjoined with id {receivedId} (client)");
                 cubeEntitiesClient.Add(new CubeEntity(clientCube, receivedId));
             }
             

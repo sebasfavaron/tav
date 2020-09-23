@@ -20,9 +20,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aed4878d-6d98-441a-9717-bd53460cb4a3" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.CS2D/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CS2D/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationServer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/ProtocolInstance.json" beforeDir="false" afterPath="$PROJECT_DIR$/Library/ProtocolInstance.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/StateCache/Hierarchy/4c969a-mainStage.json" beforeDir="false" afterPath="$PROJECT_DIR$/Library/StateCache/Hierarchy/4c969a-mainStage.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/assetDatabase3" beforeDir="false" afterPath="$PROJECT_DIR$/Library/assetDatabase3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/metadata/fa/fa02bd97f8592b9459c3f9599458eaa1" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/fa/fa02bd97f8592b9459c3f9599458eaa1" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,10 +62,10 @@
         <option value="$PROJECT_DIR$/Assets/Scripts/Network/Channel.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/Singleton.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Utils/Singleton.cs" />
-        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/FakeChannel.cs" />
-        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationServer.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" />
       </list>
     </option>
   </component>
@@ -113,7 +120,7 @@
       <workItem from="1600260383240" duration="4315000" />
       <workItem from="1600381773196" duration="2023000" />
       <workItem from="1600688990264" duration="7548000" />
-      <workItem from="1600863030513" duration="7810000" />
+      <workItem from="1600863030513" duration="9168000" />
     </task>
     <servers />
   </component>

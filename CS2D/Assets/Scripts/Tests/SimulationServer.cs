@@ -46,8 +46,6 @@ public class SimulationServer : MonoBehaviour
     {
         accum += Time.deltaTime;
 
-        //TODO: talk to more than one client
-
         //send data
         float sendRate = (1f / pps);
         if (accum >= sendRate)
@@ -131,7 +129,6 @@ public class SimulationServer : MonoBehaviour
         //serverCube.transform.parent = null;
         if (!cubeEntitiesServer.Exists(c => c.id == id))
         {
-            print($"pjoined with id {id} (server)");
             var serverCube = Instantiate(serverCubePrefab, new Vector3(Random.Range(-4, 4), 1, Random.Range(-4,4)), Quaternion.identity);
             cubeEntitiesServer.Add(new CubeEntity(serverCube, id));
         }
