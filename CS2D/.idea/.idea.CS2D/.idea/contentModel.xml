@@ -38,6 +38,7 @@
             <e p="Commands.cs" t="Include" />
             <e p="ConnectionTest.cs" t="Include" />
             <e p="CubeEntity.cs" t="Include" />
+            <e p="FakeChannel.cs" t="Include" />
             <e p="MyLogHandler.cs" t="Include" />
             <e p="SimulationClient.cs" t="Include" />
             <e p="SimulationServer.cs" t="Include" />

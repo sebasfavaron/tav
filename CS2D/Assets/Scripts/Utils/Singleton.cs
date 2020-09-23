@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Experimental.PlayerLoop;
 
 public class Singleton<T> : MonoBehaviour where T : Component
 {
@@ -7,6 +8,11 @@ public class Singleton<T> : MonoBehaviour where T : Component
 		get {
 			if (instance == null) {
 				instance = FindObjectOfType<T> ();
+				if (instance == null) {
+					GameObject obj = new GameObject ();
+					obj.name = typeof(T).Name;
+					instance = obj.AddComponent<T>();
+				}
 			}
 			return instance;
 		}

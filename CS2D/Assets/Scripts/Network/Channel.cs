@@ -31,20 +31,21 @@ public class Channel {
 	}
 
     public Channel(int port) {
-        try
+	    try
         {
 	        this.port = port;
             udpClient = new UdpClient(port);
+            udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             Thread receiveThread = new Thread(Receive);
             receiveThread.Start();
         } catch (Exception e) {
-            //Debug.Log("could not connect socket: " + e.Message);
+            Debug.Log("could not connect socket: " + e.Message);
         }
     }
 
 	public void Disconnect() {
 		if (udpClient != null) {
-			//Debug.Log("socket closed");
+			Debug.Log("socket closed");
 			udpClient.Close();
 			udpClient = null;
 		}
@@ -75,10 +76,10 @@ public class Channel {
 				}
 			} catch (SocketException e) {
 				if (e.ErrorCode != CONNECTION_CLOSED_CODE) {
-					//Debug.Log("SocketException while reading from socket: " + e + " (" + e.ErrorCode + ")");
+					Debug.Log("SocketException while reading from socket: " + e + " (" + e.ErrorCode + ")");
 				}
 			} catch (Exception e) {
-				//Debug.Log("Exception while reading from socket: " + e);
+				Debug.Log("Exception while reading from socket: " + e);
 			}
 		}
 	}
