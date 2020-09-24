@@ -24,11 +24,11 @@
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/FakeChannel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/FakeChannel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationServer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/ProtocolInstance.json" beforeDir="false" afterPath="$PROJECT_DIR$/Library/ProtocolInstance.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/ScriptAssemblies/BuiltinAssemblies.stamp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/StateCache/Hierarchy/4c969a-mainStage.json" beforeDir="false" afterPath="$PROJECT_DIR$/Library/StateCache/Hierarchy/4c969a-mainStage.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/StateCache/SceneView/cc2798-mainStage.json" beforeDir="false" afterPath="$PROJECT_DIR$/Library/StateCache/SceneView/cc2798-mainStage.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/assetDatabase3" beforeDir="false" afterPath="$PROJECT_DIR$/Library/assetDatabase3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/metadata/98/982debb929dfa4e818c5cba0c83c6031" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/98/982debb929dfa4e818c5cba0c83c6031" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/metadata/b7/b741416da3fa46e4cb0aacb3b1e54101" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/b7/b741416da3fa46e4cb0aacb3b1e54101" afterDir="false" />
@@ -66,8 +66,8 @@
         <option value="$PROJECT_DIR$/Assets/Scripts/Network/Channel.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/Singleton.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Utils/Singleton.cs" />
-        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/FakeChannel.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationServer.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs" />
       </list>
@@ -124,7 +124,7 @@
       <workItem from="1600260383240" duration="4315000" />
       <workItem from="1600381773196" duration="2023000" />
       <workItem from="1600688990264" duration="7548000" />
-      <workItem from="1600863030513" duration="14434000" />
+      <workItem from="1600863030513" duration="15563000" />
     </task>
     <servers />
   </component>

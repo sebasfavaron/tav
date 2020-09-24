@@ -52,7 +52,7 @@ public class SimulationClient : MonoBehaviour
     public void Update()
     {
         accum2 += Time.deltaTime;
-        if ((int)accum2 % 10 == 0)
+        if ((int)accum2 % 5 == 0)
         {
             PlayerJoined();
 
@@ -178,7 +178,7 @@ public class SimulationClient : MonoBehaviour
     {
         // wait for confirmation
         Packet playerJoinedPacket;
-        int port = connected ? clientId : 9000; // until connected, the only port you can hear in is 9000, where you wait for your playerJoined confirmation
+        int port = connected ? GetPort(clientId) : 9000; // until connected, the only port you can hear in is 9000, where you wait for your playerJoined confirmation
         while ((playerJoinedPacket = fakeChannel.GetPacket(port, FakeChannel.ChannelType.PLAYER_JOINED)) != null)
         {
             var randomNumber = playerJoinedPacket.buffer.GetInt();

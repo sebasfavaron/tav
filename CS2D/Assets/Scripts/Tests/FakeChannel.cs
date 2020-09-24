@@ -10,16 +10,15 @@ public class FakeChannel : Singleton<FakeChannel>
 
     public enum ChannelType
     {
+        JOIN,
+        PLAYER_JOINED,
         DATA,
         INPUT,
-        ACK,
-        PLAYER_JOINED,
-        JOIN
+        ACK
     }
 
     private void Start()
     {
-        print("fakechannel start");
     }
 
     public void Send(int port, Packet packet, ChannelType channelType)

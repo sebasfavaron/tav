@@ -33,7 +33,10 @@ public class SimulationServer : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.B))
         {
-            BotJoin();
+            for (int i = 0; i < 25; i++)
+            {
+                BotJoin();
+            }
         }
         
         //send data
@@ -90,16 +93,11 @@ public class SimulationServer : MonoBehaviour
         
         //receive joins from new players (from port 9000 because they dont have a unique port yet)
         Packet joinPacket;
-        while ((joinPacket = fakeChannel.GetPacket(9000, FakeChannel.ChannelType.JOIN)) != null)
+        while ((joinPacket = fakeChannel.GetPacket(9000, FakeChannel.ChannelType.JOIN)) != null) //TODO: see what to do with JOINs from other ports (erase/use for reconnects). Reconnects would be better as an input though
         {
             var rndNumber = joinPacket.buffer.GetInt();
             PlayerJoined(rndNumber);
         }
-    }
-
-    private int GetPort(int cubeID)
-    {
-        return 9000 + cubeID * 10;
     }
 
     private void PlayerJoined(int rndNumber)  // Server
@@ -129,6 +127,11 @@ public class SimulationServer : MonoBehaviour
         var serverCube = Instantiate(serverCubePrefab, new Vector3(Random.Range(-4, 4), 1, Random.Range(-4,4)), Quaternion.identity);
         cubeEntitiesServer.Add(new CubeEntity(serverCube, id));
         fakeChannel.InitDictionary(playerPort); // init ports for new player
+    }
+    
+    private int GetPort(int cubeID)
+    {
+        return 9000 + cubeID * 10;
     }
 
     private void BotJoin() // Same as client's Join()
