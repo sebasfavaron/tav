@@ -6,12 +6,7 @@ using UnityEngine;
 
 public class FakeChannel : Singleton<FakeChannel>
 {
-    private List<Packet> channel;  // Send data (position of all players) to client
-    private List<Packet> channel2;  // Receive input from client
-    private List<Packet> channel3;  // Send number of inputs processed (ack)
-    private List<Packet> playerJoinedChannel;  // Server (where it sends new playerJoined events)
-    private List<Packet> joinChannel;  // Server (where it listens for new join events)
-    private Dictionary<ChannelType, List<Packet>> channels;
+    private Dictionary<int, Dictionary<ChannelType, List<Packet>>> channels; // <port, <channelType, packets>>
 
     public enum ChannelType
     {
@@ -25,26 +20,27 @@ public class FakeChannel : Singleton<FakeChannel>
     private void Start()
     {
         print("fakechannel start");
-        InitDictionary();
     }
 
-    public void Send(Packet packet, ChannelType channelType)
+    public void Send(int port, Packet packet, ChannelType channelType)
     {
-        List<Packet> channel = channels[channelType];
+        List<Packet> channel = channels[port][channelType];
         
         channel.Add(packet);
     }
 
-    public Packet GetPacket(ChannelType channelType)
+    public Packet GetPacket(int port, ChannelType channelType)
     {
-        if (channels == null)
+        List<Packet> channel;
+        try
         {
-            InitDictionary();
+            channel = channels[port][channelType];
+        }
+        catch (KeyNotFoundException e)
+        {
             return null;
         }
-        
-        List<Packet> channel = channels[channelType];
-        if (channel.Count == 0)
+        if (channel == null || channel.Count == 0)
         {
             return null;
         }
@@ -54,23 +50,16 @@ public class FakeChannel : Singleton<FakeChannel>
         return first;
     }
 
-    private void InitDictionary()
+    public void InitDictionary(int port)
     {
-        channels = new Dictionary<ChannelType, List<Packet>>();
+        if (channels == null)
+        {
+            channels = new Dictionary<int, Dictionary<ChannelType, List<Packet>>>();
+        }
+        channels[port] = new Dictionary<ChannelType, List<Packet>>();
         foreach (ChannelType i in Enum.GetValues(typeof(ChannelType)))
         {
-            channels[i] = new List<Packet>();
+            channels[port][i] = new List<Packet>();
         }
-    }
-
-    public string PrintChannels()
-    {
-        string ret = "";
-        foreach (ChannelType i in Enum.GetValues(typeof(ChannelType)))
-        {
-            ret += channels[i].Count + ", ";
-        }
-
-        return ret;
     }
 }

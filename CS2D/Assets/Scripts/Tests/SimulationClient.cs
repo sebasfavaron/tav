@@ -52,15 +52,17 @@ public class SimulationClient : MonoBehaviour
     public void Update()
     {
         accum2 += Time.deltaTime;
-        if ((int)accum2 % 5 == 0)
+        if ((int)accum2 % 10 == 0)
         {
+            PlayerJoined();
+
             if (!connected)
             {
                 Join();
             }
             
             // Still check this every now and then for new players joining
-            ConfirmJoin();
+            PlayerJoined();
         }
         if (!connected || tempDisconnect)
         {
@@ -68,8 +70,8 @@ public class SimulationClient : MonoBehaviour
         }
 
         //delete from list
-        Packet packet3; 
-        while ( (packet3=fakeChannel.GetPacket(FakeChannel.ChannelType.ACK)) != null)
+        Packet packet3;
+        while ( (packet3=fakeChannel.GetPacket(GetPort(clientId), FakeChannel.ChannelType.ACK)) != null)
         {
             var toDel = packet3.buffer.GetInt();
             while (commandServer.Count != 0)
@@ -110,13 +112,13 @@ public class SimulationClient : MonoBehaviour
             }
             packet2.buffer.Flush();
 
-            fakeChannel.Send(packet2, FakeChannel.ChannelType.INPUT);
+            fakeChannel.Send(GetPort(clientId), packet2, FakeChannel.ChannelType.INPUT);
 
             accum2 -= sendRate;
         }
 
         //receive data
-        var packet = fakeChannel.GetPacket(FakeChannel.ChannelType.DATA);
+        var packet = fakeChannel.GetPacket(GetPort(clientId), FakeChannel.ChannelType.DATA);
         if (packet != null) {
             var snapshot = new Snapshot(-1, cubeEntitiesClient);
             var buffer = packet.buffer;
@@ -141,7 +143,7 @@ public class SimulationClient : MonoBehaviour
         }
     }
     
-    private void ReadInput()  // Client
+    private void ReadInput()
     {
         var timeout = Time.time + 2;
         var command = new Commands(packetNumber, Input.GetKeyDown(KeyCode.W), Input.GetKeyDown(KeyCode.S), 
@@ -166,30 +168,39 @@ public class SimulationClient : MonoBehaviour
     {
         var joinPacket = Packet.Obtain();
 
-        // send id
-        joinPacket.buffer.PutInt(clientId);
+        // send random number to validate future PlayerJoined packet
+        joinPacket.buffer.PutInt(clientId);  // Not the actual clientId, just a way to know if the future PlayerJoined packet is yours
         joinPacket.buffer.Flush();
-        fakeChannel.Send(joinPacket, FakeChannel.ChannelType.JOIN);
+        fakeChannel.Send(9000, joinPacket, FakeChannel.ChannelType.JOIN);
     }
 
-    private void ConfirmJoin(){
+    private void PlayerJoined()
+    {
         // wait for confirmation
         Packet playerJoinedPacket;
-        while ((playerJoinedPacket = fakeChannel.GetPacket(FakeChannel.ChannelType.PLAYER_JOINED)) != null)
+        int port = connected ? clientId : 9000; // until connected, the only port you can hear in is 9000, where you wait for your playerJoined confirmation
+        while ((playerJoinedPacket = fakeChannel.GetPacket(port, FakeChannel.ChannelType.PLAYER_JOINED)) != null)
         {
+            var randomNumber = playerJoinedPacket.buffer.GetInt();
             var receivedId = playerJoinedPacket.buffer.GetInt();
 
-            if (!cubeEntitiesClient.Exists(c => c.id == receivedId))
+            if (!cubeEntitiesClient.Exists(c => c.id == receivedId))  // Do not add a cube twice, check if it exists already
             {
                 var clientCube = Instantiate(clientCubePrefab, new Vector3(), Quaternion.identity);
                 cubeEntitiesClient.Add(new CubeEntity(clientCube, receivedId));
             }
             
-            if (receivedId == clientId)
+            if (randomNumber == clientId)
             {
+                clientId = receivedId;  // Now clientId is real
                 connected = true;
             }
         }
+    }
+    
+    private int GetPort(int cubeID)
+    {
+        return 9000 + cubeID * 10;
     }
     
     private void SendPacket(Packet packet, Channel sendChannel)
@@ -200,7 +211,7 @@ public class SimulationClient : MonoBehaviour
         packet.Free();
     }
 
-    private void Interpolate()  // Client
+    private void Interpolate()
     {
         var previousTime = interpolationBuffer[0].packetNumber * (1f/pps);
         var nextTime =  interpolationBuffer[1].packetNumber * (1f/pps);
