@@ -16,35 +16,18 @@ public class SimulationClient : MonoBehaviour
 
     private FakeChannel fakeChannel;
 
-    [SerializeField] private GameObject clientCubePrefab;  // Client
-    private List<CubeEntity> cubeEntitiesClient;  // Client
+    [SerializeField] private GameObject clientCubePrefab;
+    private List<CubeEntity> cubeEntitiesClient;
 
-    List<Snapshot> interpolationBuffer = new List<Snapshot>();  // Client
-    List<Commands> commandServer = new List<Commands>();  // Client
-    private int clientId;  // Client
+    List<Snapshot> interpolationBuffer = new List<Snapshot>();
+    List<Commands> commandServer = new List<Commands>();
+    private int clientId;
     
-    private int amountOfPlayers = 2;  // Both (but harcoded value to be erased)
-
     // Start is called before the first frame update
     public void Start()
     {
         fakeChannel = FakeChannel.Instance;
-        
         cubeEntitiesClient = new List<CubeEntity>();
-        /*for (int i = 0; i < amountOfPlayers; i++)
-        {
-            var clientCube = Instantiate(clientCubePrefab, new Vector3(i, 0, 0), Quaternion.identity);
-            clientCube.transform.parent = null;
-            cubeEntitiesClient.Add(new CubeEntity(clientCube, i));
-        }*/
-        
-        /*for (int id = 0; id < 2; id++)
-        {
-            var clientCube = Instantiate(clientCubePrefab, new Vector3(id, 0, 0), Quaternion.identity);
-            clientCube.transform.parent = null;
-            cubeEntitiesClient.Add(new CubeEntity(clientCube, id));    
-        }*/
-        //enabled = false;
         clientId = Random.Range(0, 1000000);
     }
 

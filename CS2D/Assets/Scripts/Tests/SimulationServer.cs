@@ -11,11 +11,9 @@ public class SimulationServer : MonoBehaviour
 
     private FakeChannel fakeChannel;
     
-    [SerializeField] private GameObject serverCubePrefab;  // Server
-    private List<CubeEntity> cubeEntitiesServer;  // Server
+    [SerializeField] private GameObject serverCubePrefab;
+    private List<CubeEntity> cubeEntitiesServer;
 
-    private int amountOfPlayers = 2;  // Both (but harcoded value to be erased)
-    
     
     // Start is called before the first frame update
     public void Start()
