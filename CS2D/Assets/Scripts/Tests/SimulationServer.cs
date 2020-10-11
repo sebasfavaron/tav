@@ -13,15 +13,17 @@ public class SimulationServer : MonoBehaviour
     
     [SerializeField] private GameObject serverCubePrefab;
     private List<CubeEntity> cubeEntitiesServer;
+    private List<int> randomNumbersReceived;
 
-    
+
     // Start is called before the first frame update
     public void Start()
     {
         fakeChannel = FakeChannel.Instance;
-        fakeChannel.InitDictionary(9000);  // reserved port for initial joins and playerJoins
+        fakeChannel.InitPorts(9000);  // reserved port for initial joins and playerJoins
 
         cubeEntitiesServer = new List<CubeEntity>();
+        randomNumbersReceived = new List<int>();
     }
 
     // Update is called once per frame
@@ -31,7 +33,7 @@ public class SimulationServer : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.B))
         {
-            for (int i = 0; i < 25; i++)
+            for (int i = 0; i < 10; i++)
             {
                 BotJoin();
             }
@@ -91,23 +93,27 @@ public class SimulationServer : MonoBehaviour
         
         //receive joins from new players (from port 9000 because they dont have a unique port yet)
         Packet joinPacket;
-        while ((joinPacket = fakeChannel.GetPacket(9000, FakeChannel.ChannelType.JOIN)) != null) //TODO: see what to do with JOINs from other ports (erase/use for reconnects). Reconnects would be better as an input though
+        while ((joinPacket = fakeChannel.GetPacket(9000, FakeChannel.ChannelType.JOIN)) != null)
         {
             var rndNumber = joinPacket.buffer.GetInt();
-            PlayerJoined(rndNumber);
+            var existingPlayer = randomNumbersReceived.Contains(rndNumber);
+            if (!existingPlayer)
+            {
+                PlayerJoined(rndNumber);
+                randomNumbersReceived.Add(rndNumber);    
+            }
         }
     }
 
     private void PlayerJoined(int rndNumber)  // Server
     {
-        if (cubeEntitiesServer.Count == 100)
+        if (cubeEntitiesServer.Count == 1000) // Not an actual limitation for FakeChannel
         {
             print($"Reached server limit (for port limitations). Not adding player with random number {rndNumber}");
             return;
         }
         
         var id = cubeEntitiesServer.Count + 1;
-        int playerPort = GetPort(id);
 
         // send player joined packet to everyone (including new player)
         Packet playerJoinedPacket = Packet.Obtain();
@@ -117,19 +123,20 @@ public class SimulationServer : MonoBehaviour
         fakeChannel.Send(9000, playerJoinedPacket, FakeChannel.ChannelType.PLAYER_JOINED); // send it to new player
         foreach (var cube in cubeEntitiesServer) // send it to the rest
         {
-            int port = GetPort(cube.id);
-            fakeChannel.Send(port, playerJoinedPacket, FakeChannel.ChannelType.PLAYER_JOINED);
+            fakeChannel.Send(GetPort(cube.id), playerJoinedPacket, FakeChannel.ChannelType.PLAYER_JOINED);
         }
         
         // init new player
-        var serverCube = Instantiate(serverCubePrefab, new Vector3(Random.Range(-4, 4), 1, Random.Range(-4,4)), Quaternion.identity);
-        cubeEntitiesServer.Add(new CubeEntity(serverCube, id));
-        fakeChannel.InitDictionary(playerPort); // init ports for new player
+        int playerPort = GetPort(id);
+        var serverCubeGO = Instantiate(serverCubePrefab, new Vector3(), Quaternion.identity);
+        var serverCube = new CubeEntity(serverCubeGO, id);
+        cubeEntitiesServer.Add(serverCube);
+        fakeChannel.InitPorts(playerPort); // init ports for new player
     }
     
     private int GetPort(int cubeID)
     {
-        return 9000 + cubeID * 10;
+        return fakeChannel.GetPort(cubeID);
     }
 
     private void BotJoin() // Same as client's Join()

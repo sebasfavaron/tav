@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 53744870109099053}
   - component: {fileID: 53744870109099054}
   - component: {fileID: 53744870109099090}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Cube(Server)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

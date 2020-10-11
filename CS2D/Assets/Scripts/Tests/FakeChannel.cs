@@ -49,7 +49,7 @@ public class FakeChannel : Singleton<FakeChannel>
         return first;
     }
 
-    public void InitDictionary(int port)
+    public void InitPorts(int port)
     {
         if (channels == null)
         {
@@ -60,5 +60,10 @@ public class FakeChannel : Singleton<FakeChannel>
         {
             channels[port][i] = new List<Packet>();
         }
+    }
+
+    public int GetPort(int cubeID)
+    {
+        return 9000 + cubeID;
     }
 }

@@ -6,6 +6,7 @@ using UnityEngine;
 public class SimulationClient : MonoBehaviour
 {
     private float accum2 = 0f;
+    private int joinCooldown = 0;
     private int packetNumber = 0;
     public int pps = 100;
     private float clientTime = 0f;
@@ -20,9 +21,11 @@ public class SimulationClient : MonoBehaviour
     private List<CubeEntity> cubeEntitiesClient;
 
     List<Snapshot> interpolationBuffer = new List<Snapshot>();
-    List<Commands> commandServer = new List<Commands>();
+    List<Commands> commands = new List<Commands>();
     private int clientId;
-    
+    private CubeEntity clientCube = null;
+    private Rigidbody clientCubeRigidBody = null;
+
     // Start is called before the first frame update
     public void Start()
     {
@@ -35,33 +38,48 @@ public class SimulationClient : MonoBehaviour
     public void Update()
     {
         accum2 += Time.deltaTime;
-        if ((int)accum2 % 5 == 0)
+        if (joinCooldown == 0)
         {
-            PlayerJoined();
-
-            if (!connected)
-            {
-                Join();
-            }
-            
             // Still check this every now and then for new players joining
             PlayerJoined();
+            
+            if (!connected)
+            {
+                PlayerJoined();
+                Join();
+            }
+
+            joinCooldown = 60 * 5;
         }
-        if (!connected || tempDisconnect)
+        else
         {
-            return;
+            joinCooldown--;
+        }
+        if (!connected || tempDisconnect) //TODO: code connect/reconnect as an input, blocking messages from/to the server
+        {
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                tempDisconnect = false;
+                //fakeChannel.Connect(FakeChannel.ChannelType.INPUT);
+                //fakeChannel.Connect(FakeChannel.ChannelType.ACK);
+            }
+            else
+            {
+                // Exit early if i'm disconnected
+                return;
+            }
         }
 
-        //delete from list
+        // Delete acknowledged commands from list
         Packet packet3;
         while ( (packet3=fakeChannel.GetPacket(GetPort(clientId), FakeChannel.ChannelType.ACK)) != null)
         {
             var toDel = packet3.buffer.GetInt();
-            while (commandServer.Count != 0)
+            while (commands.Count != 0)
             {
-                if (commandServer[0].time <= toDel)
+                if (commands[0].time <= toDel)
                 {
-                    commandServer.RemoveAt(0);
+                    commands.RemoveAt(0);
                 }
                 else
                 {
@@ -70,11 +88,11 @@ public class SimulationClient : MonoBehaviour
             }
         }
 
-        while(commandServer.Count != 0)
+        while(commands.Count != 0)
         {
-            if (commandServer[0].timestamp < Time.time)
+            if (commands[0].timestamp < Time.time)
             {
-                commandServer.RemoveAt(0);
+                commands.RemoveAt(0);
             }
             else
             {
@@ -82,14 +100,14 @@ public class SimulationClient : MonoBehaviour
             }
         }
 
-        //send input
-        float sendRate = (1f / 100);
+        // Send input
+        float sendRate = (1f / pps);
         if (accum2 >= sendRate)
         {
-            ReadInput();
+            StoreAndApplyInput();
             var packet2 = Packet.Obtain();
-            packet2.buffer.PutInt(commandServer.Count);
-            foreach (var currentCommand in commandServer)
+            packet2.buffer.PutInt(commands.Count);
+            foreach (var currentCommand in commands)
             {
                 currentCommand.Serialize(packet2.buffer);
             }
@@ -100,7 +118,7 @@ public class SimulationClient : MonoBehaviour
             accum2 -= sendRate;
         }
 
-        //receive data
+        // Receive data
         var packet = fakeChannel.GetPacket(GetPort(clientId), FakeChannel.ChannelType.DATA);
         if (packet != null) {
             var snapshot = new Snapshot(-1, cubeEntitiesClient);
@@ -126,25 +144,40 @@ public class SimulationClient : MonoBehaviour
         }
     }
     
-    private void ReadInput()
+    private void StoreAndApplyInput()
     {
-        var timeout = Time.time + 2;
+        // Store
+        var timeout = Time.time + 1;
         var command = new Commands(packetNumber, Input.GetKeyDown(KeyCode.W), Input.GetKeyDown(KeyCode.S), 
             Input.GetKeyDown(KeyCode.A), Input.GetKeyDown(KeyCode.D),
             Input.GetKeyDown(KeyCode.Space), timeout);
-        commandServer.Add(command);
+        commands.Add(command);
+        
         if (Input.GetKeyDown(KeyCode.X))
         {
-            tempDisconnect = true;  //TODO: esto ya no funciona (pero no hace falta creo)
+            tempDisconnect = true;
             //fakeChannel.Disconnect(FakeChannel.ChannelType.INPUT);
             //fakeChannel.Disconnect(FakeChannel.ChannelType.ACK);
         }
-        if (Input.GetKeyDown(KeyCode.C))
+
+        // Apply
+        if(clientCubeRigidBody == null)
         {
-            tempDisconnect = false;
-            //fakeChannel.Connect(FakeChannel.ChannelType.INPUT);
-            //fakeChannel.Connect(FakeChannel.ChannelType.ACK);
+            clientCubeRigidBody = clientCube.cubeGameObject.GetComponent<Rigidbody>();
+            if (clientCubeRigidBody == null)
+            {
+                return;
+            }
         }
+        
+        Vector3 force = Vector3.zero;
+        force += command.space ? Vector3.up * 5 : Vector3.zero;
+        force += command.up ? Vector3.forward * 2 : Vector3.zero;
+        force += command.down ? Vector3.back * 2 : Vector3.zero;
+        force += command.left ? Vector3.left * 2 : Vector3.zero;
+        force += command.right ? Vector3.right * 2 : Vector3.zero;
+        
+        clientCubeRigidBody.AddForceAtPosition(force, Vector3.zero, ForceMode.Impulse);
     }
 
     private void Join()
@@ -167,15 +200,14 @@ public class SimulationClient : MonoBehaviour
             var randomNumber = playerJoinedPacket.buffer.GetInt();
             var receivedId = playerJoinedPacket.buffer.GetInt();
 
-            if (!cubeEntitiesClient.Exists(c => c.id == receivedId))  // Do not add a cube twice, check if it exists already
-            {
-                var clientCube = Instantiate(clientCubePrefab, new Vector3(), Quaternion.identity);
-                cubeEntitiesClient.Add(new CubeEntity(clientCube, receivedId));
-            }
-            
+            var cubeGO = Instantiate(clientCubePrefab, new Vector3(), Quaternion.identity);
+            var cube = new CubeEntity(cubeGO, receivedId);
+            cubeEntitiesClient.Add(cube);
+
             if (randomNumber == clientId)
             {
                 clientId = receivedId;  // Now clientId is real
+                clientCube = cube;
                 connected = true;
             }
         }
@@ -183,7 +215,7 @@ public class SimulationClient : MonoBehaviour
     
     private int GetPort(int cubeID)
     {
-        return 9000 + cubeID * 10;
+        return fakeChannel.GetPort(cubeID);
     }
     
     private void SendPacket(Packet packet, Channel sendChannel)
@@ -200,7 +232,7 @@ public class SimulationClient : MonoBehaviour
         var nextTime =  interpolationBuffer[1].packetNumber * (1f/pps);
         var t =  (clientTime - previousTime) / (nextTime - previousTime);
         var interpolatedSnapshot = Snapshot.CreateInterpolated(interpolationBuffer[0], interpolationBuffer[1], t);
-        interpolatedSnapshot.Apply();
+        interpolatedSnapshot.Apply(clientId);
 
         if(clientTime > nextTime) {
             interpolationBuffer.RemoveAt(0);

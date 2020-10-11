@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class Snapshot
@@ -35,9 +36,15 @@ public class Snapshot
         return new Snapshot(-1, cubeEntities);
     }
 
-    public void Apply()
+    public void Apply(int clientId)
     {
-        cubeEntities.ForEach(c => c.Apply());
+        cubeEntities.ForEach(c =>
+        {
+            if (c.id != clientId) // Do not interpolate client
+            {
+                c.Apply();
+            }
+        });
     }
 
 }
