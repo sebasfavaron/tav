@@ -1,19 +1,23 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SimulationServer : MonoBehaviour
 {
     private float accum = 0f;
     private int packetNumber = 0;
     public int pps = 100;
+    private int maxInput = 0;
 
     private FakeChannel fakeChannel;
     
     [SerializeField] private GameObject serverCubePrefab;
     private List<CubeEntity> cubeEntitiesServer;
     private List<int> randomNumbersReceived;
+    private CharacterController characterController;
 
 
     // Start is called before the first frame update
@@ -24,6 +28,55 @@ public class SimulationServer : MonoBehaviour
 
         cubeEntitiesServer = new List<CubeEntity>();
         randomNumbersReceived = new List<int>();
+        characterController = GetComponent<CharacterController>();
+    }
+
+    private void FixedUpdate()
+    {
+        // receive input
+        Packet packet;
+        foreach (var cube in cubeEntitiesServer)
+        {
+            int port = GetPort(cube.id);
+            while ( (packet = fakeChannel.GetPacket(port, FakeChannel.ChannelType.INPUT)) != null)
+            {
+                int max = 0, amountOfCommandsToProcess = packet.buffer.GetInt();
+                for (int i = 0; i < amountOfCommandsToProcess; i++)
+                {
+                    var command = new Commands();
+                    command.Deserialize(packet.buffer);
+
+                    if (command.inputNumber <= maxInput)
+                    {
+                        // print(command.inputNumber);
+                        // TODO: fix double sending of command in ack
+                        return;
+                    }
+                 
+                    // Vector3 force = Vector3.zero;
+                    // force += command.space ? Vector3.up * (500 * Time.fixedDeltaTime) : Vector3.zero;
+                    // force += command.up ? Vector3.forward * (200 * Time.fixedDeltaTime) : Vector3.zero;
+                    // force += command.down ? Vector3.back * (200 * Time.fixedDeltaTime) : Vector3.zero;
+                    // force += command.left ? Vector3.left * (200 * Time.fixedDeltaTime) : Vector3.zero;
+                    // force += command.right ? Vector3.right * (200 * Time.fixedDeltaTime) : Vector3.zero;
+                    //
+                    // cube.cubeGameObject.GetComponent<Rigidbody>().AddForceAtPosition(force, Vector3.zero, ForceMode.Impulse);
+                    
+                    cube.cubeGameObject.GetComponent<CharacterController>().Move(command.moveVector * (10 * Time.fixedDeltaTime));
+
+                    max = Mathf.Max(command.inputNumber, max);
+                }
+
+                // send ack
+                var packet3 = Packet.Obtain();
+                packet3.buffer.PutInt(max);
+                // var sendCube = new CubeEntity(Vector3.zero, Quaternion.identity, serverCubePrefab);
+                // sendCube.Serialize(packet3.buffer);
+                packet3.buffer.Flush();
+                fakeChannel.Send(port, packet3, FakeChannel.ChannelType.ACK);
+                maxInput = Mathf.Max(max, maxInput);
+            }
+        }
     }
 
     // Update is called once per frame
@@ -39,59 +92,7 @@ public class SimulationServer : MonoBehaviour
             }
         }
         
-        //send data
-        float sendRate = (1f / pps);
-        if (accum >= sendRate)
-        {
-            packetNumber += 1;
-            
-            //serialize
-            var packet = Packet.Obtain();
-            var snapshot = new Snapshot(packetNumber, cubeEntitiesServer);
-            snapshot.Serialize(packet.buffer);
-            packet.buffer.Flush();
-            foreach (var cube in cubeEntitiesServer)
-            {
-                fakeChannel.Send(GetPort(cube.id), packet, FakeChannel.ChannelType.DATA);
-            }
-            
-            // Restart accum
-            accum -= sendRate;
-        }
-        
-        
-        //receive input
-        Packet packet2;
-        foreach (var cube in cubeEntitiesServer)
-        {
-            int port = GetPort(cube.id);
-            while ( (packet2 = fakeChannel.GetPacket(port, FakeChannel.ChannelType.INPUT)) != null)
-            {
-                int max = 0, amountOfCommandsToProcess = packet2.buffer.GetInt();
-                for (int i = 0; i < amountOfCommandsToProcess; i++){
-                    var commands = new Commands();
-                    commands.Deserialize(packet2.buffer);
-                    Vector3 force = Vector3.zero;
-                    force += commands.space ? Vector3.up * 5 : Vector3.zero;
-                    force += commands.up ? Vector3.forward * 2 : Vector3.zero;
-                    force += commands.down ? Vector3.back * 2 : Vector3.zero;
-                    force += commands.left ? Vector3.left * 2 : Vector3.zero;
-                    force += commands.right ? Vector3.right * 2 : Vector3.zero;
-                    
-                    cube.cubeGameObject.GetComponent<Rigidbody>().AddForceAtPosition(force, Vector3.zero, ForceMode.Impulse);
-                
-                    max = commands.time;
-                }
-
-                //send ack
-                var packet3 = Packet.Obtain();
-                packet3.buffer.PutInt(max);
-                packet3.buffer.Flush();
-                fakeChannel.Send(port, packet3, FakeChannel.ChannelType.ACK);
-            }
-        }
-        
-        //receive joins from new players (from port 9000 because they dont have a unique port yet)
+        // receive joins from new players (from port 9000 because they dont have a unique port yet)
         Packet joinPacket;
         while ((joinPacket = fakeChannel.GetPacket(9000, FakeChannel.ChannelType.JOIN)) != null)
         {
@@ -102,6 +103,26 @@ public class SimulationServer : MonoBehaviour
                 PlayerJoined(rndNumber);
                 randomNumbersReceived.Add(rndNumber);    
             }
+        }
+
+        // send data
+        float sendRate = (1f / pps);
+        if (accum >= sendRate)
+        {
+            packetNumber += 1;
+            
+            // serialize
+            var snapshot = new Snapshot(packetNumber, maxInput, cubeEntitiesServer);
+            var packet = Packet.Obtain();
+            snapshot.Serialize(packet.buffer);
+            packet.buffer.Flush();
+            foreach (var cube in cubeEntitiesServer)
+            {
+                fakeChannel.Send(GetPort(cube.id), packet, FakeChannel.ChannelType.DATA);
+            }
+            
+            // Restart accum
+            accum -= sendRate;
         }
     }
 
@@ -115,7 +136,7 @@ public class SimulationServer : MonoBehaviour
         
         var id = cubeEntitiesServer.Count + 1;
 
-        // send player joined packet to everyone (including new player)
+        // send player joined packet to everyone (including to the new player as a confirmation)
         Packet playerJoinedPacket = Packet.Obtain();
         playerJoinedPacket.buffer.PutInt(rndNumber);
         playerJoinedPacket.buffer.PutInt(id);

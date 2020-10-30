@@ -3,28 +3,20 @@ using UnityEngine;
 public class Commands
 {
 
-    public int time;
-    public bool up, down, left, right, space;
+    public int inputNumber;
+    public Vector3 moveVector;
     public float timestamp;
 
-    public Commands(int time, bool up, bool down, bool left, bool right, bool space)
+    public Commands(int inputNumber, Vector3 moveVector)
     {
-        this.time = time;
-        this.up = up;
-        this.down = down;
-        this.left = left;
-        this.right = right;
-        this.space = space;
+        this.inputNumber = inputNumber;
+        this.moveVector = moveVector;
     }
     
-    public Commands(int time, bool up, bool down, bool left, bool right, bool space, float timestamp)
+    public Commands(int inputNumber, Vector3 moveVector, float timestamp)
     {
-        this.time = time;
-        this.up = up;
-        this.down = down;
-        this.left = left;
-        this.right = right;
-        this.space = space;
+        this.inputNumber = inputNumber;
+        this.moveVector = moveVector;
         this.timestamp = timestamp;
     }
 
@@ -32,21 +24,15 @@ public class Commands
 
     public void Serialize(BitBuffer buffer)
     {
-        buffer.PutInt(time);
-        buffer.PutBit(up);
-        buffer.PutBit(down);
-        buffer.PutBit(left);
-        buffer.PutBit(right);
-        buffer.PutBit(space);
+        buffer.PutInt(inputNumber);
+        buffer.PutFloat(moveVector.x);
+        buffer.PutFloat(moveVector.y);
+        buffer.PutFloat(moveVector.z);
     }
     
     public void Deserialize(BitBuffer buffer)
     {
-        time = buffer.GetInt();
-        up = buffer.GetBit();
-        down = buffer.GetBit();
-        left = buffer.GetBit();
-        right = buffer.GetBit();
-        space = buffer.GetBit();
+        inputNumber = buffer.GetInt();
+        moveVector = new Vector3(buffer.GetFloat(), buffer.GetFloat(), buffer.GetFloat());
     }
 }

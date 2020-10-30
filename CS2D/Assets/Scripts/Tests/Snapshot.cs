@@ -5,25 +5,35 @@ using UnityEngine;
 
 public class Snapshot
 {
-    private List<CubeEntity> cubeEntities;
+    public List<CubeEntity> cubeEntities;
     public int packetNumber;
+    public int inputNumber;  // last input processed
 
-    public Snapshot(int packetNumber, List<CubeEntity> cubeEntities)
+    public Snapshot(int packetNumber, int inputNumber, List<CubeEntity> cubeEntities)
     {
         this.cubeEntities = cubeEntities;
         this.packetNumber = packetNumber;
+        this.inputNumber = inputNumber;
     }
     
     public void Serialize(BitBuffer buffer)
     {
         buffer.PutInt(packetNumber);
+        buffer.PutInt(inputNumber);
         cubeEntities.ForEach(c => c.Serialize(buffer));
     }
     
     public void Deserialize(BitBuffer buffer)
     {
         packetNumber = buffer.GetInt();
-        cubeEntities.ForEach(c => c.Deserialize(buffer));
+        inputNumber = buffer.GetInt();
+        cubeEntities.ForEach(c =>
+        {
+            if (buffer.HasRemaining())  // In case new players haven't been added to the client yet
+            {
+                c.Deserialize(buffer);
+            }
+        });
     }
     
     public static Snapshot CreateInterpolated(Snapshot previous, Snapshot next, float t)
@@ -33,7 +43,7 @@ public class Snapshot
         {
             cubeEntities.Add(CubeEntity.createInterpolated(previous.cubeEntities[i], next.cubeEntities[i], t));
         }
-        return new Snapshot(-1, cubeEntities);
+        return new Snapshot(-1, -1, cubeEntities);
     }
 
     public void Apply(int clientId)

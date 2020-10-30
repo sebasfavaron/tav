@@ -22,6 +22,14 @@ public class CubeEntity
         this.rotation = rotation;
         this.cubeGameObject = cubeGameObject;
     }
+    
+    public CubeEntity(CubeEntity original)
+    {
+        this.cubeGameObject = original.cubeGameObject;
+        this.id = original.id;
+        this.position = new Vector3(original.position.x, original.position.y, original.position.z);
+        this.rotation = new Quaternion(original.rotation.x, original.rotation.y, original.rotation.z, original.rotation.w);
+    }
 
     public void Serialize(BitBuffer buffer)
     {

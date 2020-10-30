@@ -24,7 +24,6 @@ public class FakeChannel : Singleton<FakeChannel>
     public void Send(int port, Packet packet, ChannelType channelType)
     {
         List<Packet> channel = channels[port][channelType];
-        
         channel.Add(packet);
     }
 
