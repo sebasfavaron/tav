@@ -3,13 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 using Random = UnityEngine.Random;
 
 public class SimulationClient : MonoBehaviour
 {
     private float accum = 0f;
     public int pps = 60;
-    private float accumReconciliate = 0;    private float joinCooldown = 0;
+    private float accumReconciliate = 0;
+    private float joinCooldown = 0;
     public float rps = 1; // reconciliates per second
     private int packetNumber = 0;
     private int inputNumber = 0;
@@ -22,7 +24,7 @@ public class SimulationClient : MonoBehaviour
     private FakeChannel fakeChannel;
 
     [SerializeField] private GameObject clientCubePrefab;
-    private CharacterController characterController;
+    [SerializeField] private GameObject clientReconciliateCubePrefab;
     private List<CubeEntity> cubeEntitiesClient;
 
     List<Snapshot> interpolationBuffer = new List<Snapshot>();
@@ -30,9 +32,9 @@ public class SimulationClient : MonoBehaviour
     List<Commands> reconciliateCommands = new List<Commands>();
     private int clientId;
     private CubeEntity clientCube = null;
-    private CharacterController clientCubeCharController = null;
-
-    private CubeEntity clientInServer;
+    private CharacterController clientCharacterController = null;
+    private CubeEntity conciliateClientCube;
+    private CharacterController conciliateCharacterController;
 
     // Start is called before the first frame update
     public void Start()
@@ -40,88 +42,110 @@ public class SimulationClient : MonoBehaviour
         fakeChannel = FakeChannel.Instance;
         cubeEntitiesClient = new List<CubeEntity>();
         clientId = Random.Range(0, 1000000);
-        characterController = GetComponent<CharacterController>();
     }
 
     private void FixedUpdate()
     {
-        if (!connected) return;
+        // if (!connected) return; // TODO: creo que tengo que sacar este check, por ahi me genera el desfazaje
 
-        // Send input
-        float sendRate = (1f / pps);
-        accum += Time.deltaTime;
-        if (accum >= sendRate)
-        {
-            StoreAndApplyInput();
-            var packet = Packet.Obtain();
-            packet.buffer.PutInt(commands.Count);
-            foreach (var command in commands)
-            {
-                // print("----------------");
-                // print(command.inputNumber);
-                command.Serialize(packet.buffer);
-            }
-            packet.buffer.Flush();
-
-            fakeChannel.Send(GetPort(clientId), packet, FakeChannel.ChannelType.INPUT);
-
-            accum -= sendRate;
-        }
-        
-        // reconciliate (client)
-        float reconciliateRate = (1f / rps);
-        accumReconciliate += Time.deltaTime;
-        if (accumReconciliate >= reconciliateRate)
-        {
-            Reconciliate();
-            accumReconciliate -= reconciliateRate;
-        }
-
-        // interpolate (others)
-        clientPlaying = (interpolationBuffer.Count >= requiredSnapshots && interpolationBuffer.Count > 1);
-        while (clientPlaying) {
-            if(!Interpolate()) break;
-            clientPlaying = (interpolationBuffer.Count >= requiredSnapshots && interpolationBuffer.Count > 1);
-        }
+        ReadStoreApplySendInput(); // TODO: not using sendrate/pps?
+        // float sendRate = (1f / pps);
+        // accum += Time.deltaTime;
+        // if (accum >= sendRate)
+        // {
+        //     StoreAndApplyInput();
+        //     var packet = Packet.Obtain();
+        //     packet.buffer.PutInt(commands.Count);
+        //     foreach (var command in commands)
+        //     {
+        //         // print("----------------");
+        //         // print(command.inputNumber);
+        //         command.Serialize(packet.buffer);
+        //     }
+        //     packet.buffer.Flush();
+        //
+        //     fakeChannel.Send(GetPort(clientId), packet, FakeChannel.ChannelType.INPUT);
+        //
+        //     accum -= sendRate;
+        // }
     }
 
     // Update is called once per frame
     public void Update()
     {
         clientTime += Time.deltaTime;
-        if (joinCooldown <= 0)
+        
+        while(commands.Count > 0 && commands[0].timestamp < Time.time)
         {
-            // Check this every now and then for new players joining
-            PlayerJoined();
-            if (!connected)
-            {
-                Join();
-            }
+            commands.RemoveAt(0);
+        }
+        
+        // if (!connected || tempDisconnect) //TODO: code connect/reconnect as an input, blocking messages from/to the server
+        // {
+        //     if (Input.GetKeyDown(KeyCode.C))
+        //     {
+        //         tempDisconnect = false;
+        //         //fakeChannel.Connect(FakeChannel.ChannelType.INPUT);
+        //         //fakeChannel.Connect(FakeChannel.ChannelType.ACK);
+        //     }
+        //     else
+        //     {
+        //         // Exit early if i'm disconnected
+        //         return; // TODO: check if this is necessary or just generating el desfazaje
+        //     }
+        // }
 
-            joinCooldown = 2f;
+        Packet packet;
+        if (connected)
+        {
+            while ((packet = fakeChannel.GetPacket((int) clientCube.port)) != null)
+            {
+                int type = packet.buffer.GetInt();
+                switch (type)
+                {
+                    case (int) Utils.Ports.ACK:
+                        AckInputs(packet);
+                        break;
+                    case (int) Utils.Ports.DATA:
+                        ReceiveData(packet);
+                        break;
+                    case (int) Utils.Ports.PLAYER_JOINED:
+                        PlayerJoined(packet);
+                        // JoinActions(packet);
+                        break;
+                }
+
+                packet.Free();
+            }
         }
         else
         {
-            joinCooldown -= Time.deltaTime;
-        }
-        if (!connected || tempDisconnect) //TODO: code connect/reconnect as an input, blocking messages from/to the server
-        {
-            if (Input.GetKeyDown(KeyCode.C))
+            packet = fakeChannel.GetPacket(9000);
+            if (packet != null)
             {
-                tempDisconnect = false;
-                //fakeChannel.Connect(FakeChannel.ChannelType.INPUT);
-                //fakeChannel.Connect(FakeChannel.ChannelType.ACK);
+                PlayerJoined(packet);
             }
-            else
-            {
-                // Exit early if i'm disconnected
-                return;
-            }
+            Join(); // TODO: spam? maybe bring cooldown back for this only
         }
 
-        // Delete acknowledged commands from list
+        InterpolateAndReconciliate();
+    }
+
+    private void JoinActions(Packet packet)
+    {
+        int? port = connected ? clientCube.port : 9000; // until connected, the only port you can hear in is 9000, where you wait for your playerJoined confirmation
+
+        PlayerJoined(packet);
+        if (!connected)
+        {
+            Join(); // TODO: spam? maybe bring cooldown back for this only
+        }
+    }
+
+    private void AckInputs(Packet packet)
+    {
         Packet packet3;
-        while ( (packet3=fakeChannel.GetPacket(GetPort(clientId), FakeChannel.ChannelType.ACK)) != null)
+        while ( (packet3=fakeChannel.GetPacket((int) Utils.Ports.ACK)) != null)
         {
             var toDel = packet3.buffer.GetInt();
             // clientInServer = new CubeEntity(Vector3.zero, Quaternion.identity, clientCubePrefab);
@@ -131,25 +155,39 @@ public class SimulationClient : MonoBehaviour
                 commands.RemoveAt(0);
             }
         }
+    }
+    
+    private void ReceiveData(Packet packet)
+    {
+        var snapshot = new Snapshot(-1, -1, cubeEntitiesClient);
 
-        /*while(commands.Count > 0 && commands[0].timestamp < Time.time)
+        snapshot.Deserialize(packet.buffer);
+
+        int size = interpolationBuffer.Count;
+        if((size == 0 || snapshot.packetNumber > interpolationBuffer[size - 1].packetNumber) && size < requiredSnapshots + 1) {
+            interpolationBuffer.Add(snapshot);
+        }
+    }
+
+    private void InterpolateAndReconciliate()
+    {
+        while (interpolationBuffer.Count >= requiredSnapshots)
         {
-            commands.RemoveAt(0);
-        }*/
-
-        // Receive data
-        var packet = fakeChannel.GetPacket(GetPort(clientId), FakeChannel.ChannelType.DATA);
-        if (packet != null)
-        {
-            var snapshot = new Snapshot(-1, -1, cubeEntitiesClient);
-            var buffer = packet.buffer;
-
-            snapshot.Deserialize(buffer);
-
-            int size = interpolationBuffer.Count;
-            if(size == 0 || snapshot.packetNumber > interpolationBuffer[size - 1].packetNumber) {
-                interpolationBuffer.Add(snapshot);
-            }
+            Interpolate();
+            Reconciliate();    
+        }
+    }
+    
+    private void Interpolate()
+    {
+        var previousTime = interpolationBuffer[0].packetNumber * (1f/pps);
+        var nextTime =  interpolationBuffer[1].packetNumber * (1f/pps);
+        var t =  (clientTime - previousTime) / (nextTime - previousTime);
+        var interpolatedSnapshot = Snapshot.CreateInterpolated(interpolationBuffer[0], interpolationBuffer[1], t);
+        interpolatedSnapshot.Apply(clientId);
+        
+        if(clientTime > nextTime) {
+            interpolationBuffer.RemoveAt(0);
         }
     }
 
@@ -165,7 +203,7 @@ public class SimulationClient : MonoBehaviour
         //     }
         // });
         var lastServerSnapshot = interpolationBuffer[interpolationBuffer.Count - 1];
-        clientInServer = lastServerSnapshot.cubeEntities.Find(c => c.id == clientId);
+        var clientInServer = lastServerSnapshot.cubeEntities.Find(c => c.id == clientId);
         
         // 1. Deactivate real client
         // 2. Instantiate fake client
@@ -178,41 +216,47 @@ public class SimulationClient : MonoBehaviour
         // 2. Tp client to client's position in server
         // clientCubeRigidBody.position = clientInServer.position; // WARN: capaz tengo que hacer deep copy
         // clientCubeRigidBody.rotation = clientInServer.rotation; // WARN: capaz tengo que hacer deep copy
-        clientCube.cubeGameObject.transform.position = clientInServer.position;
-        clientCube.cubeGameObject.transform.rotation = clientInServer.rotation;
+        conciliateClientCube.cubeGameObject.transform.position = clientInServer.position;
+        conciliateClientCube.cubeGameObject.transform.rotation = clientInServer.rotation;
 
         // 3. Simulate movements from 'commands' list (all commands not confirmed by server)
-        var toRemove = new List<Commands>();
-        print("=======================================");
-        reconciliateCommands.ForEach(command =>
+        // var toRemove = new List<Commands>();
+        // reconciliateCommands.ForEach(command =>
+        // {
+        //     print($"c: {command.inputNumber}, s: {lastServerSnapshot.inputNumber}, apply: {command.inputNumber >= lastServerSnapshot.inputNumber}");
+        //     if (command.inputNumber >= lastServerSnapshot.inputNumber)
+        //     {
+        //         // print("Applying");
+        //         // TODO: investigar desfazaje entre inputNumber del snapshot y reconciliateCommands (podria ser la razon por la que salta tanto para atras el cliente y no vuelve al "presente")
+        //         Apply(command);
+        //         toRemove.Add(command);
+        //     }
+        // });
+        // toRemove.ForEach(c => reconciliateCommands.Remove(c));
+        foreach (var command in commands)
         {
-            print($"c: {command.inputNumber}, s: {lastServerSnapshot.inputNumber}, apply: {command.inputNumber >= lastServerSnapshot.inputNumber}");
-            if (command.inputNumber >= lastServerSnapshot.inputNumber)
-            {
-                // print("Applying");
-                // TODO: investigar desfazaje entre inputNumber del snapshot y reconciliateCommands (podria ser la razon por la que salta tanto para atras el cliente y no vuelve al "presente")
-                Apply(command);
-                toRemove.Add(command);
-            }
-        });
-        toRemove.ForEach(c => reconciliateCommands.Remove(c));
-        
-        // 4. Check if the resulting position is the same as the saved client's position (with a delta for error). If true, tp client to saved client's position (or simply don't check)
-        // not checking for now..
+            Apply(command, conciliateClientCube, conciliateCharacterController);
+        }
+
+        // 4. Apply reconciliate position and rotation to client
+        var reconciliatePos = conciliateClientCube.cubeGameObject.transform.position;
+        var clientPos = clientCube.cubeGameObject.transform.position;
+
+        var yPos = Math.Abs(reconciliatePos.y - clientPos.y) > 4 ? reconciliatePos.y : clientPos.y; // TODO: remove this check, just apply reconciliate pos to client
+        clientCube.cubeGameObject.transform.position = new Vector3(reconciliatePos.x, yPos, reconciliatePos.z);
+        clientCube.cubeGameObject.transform.rotation = conciliateClientCube.cubeGameObject.transform.rotation;
     }
 
-    private void StoreAndApplyInput()
+    private void ReadStoreApplySendInput()
     {
-        var timeout = Time.time + 1;
-        inputNumber += 1;
-        var moveVector = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        var command = new Commands(inputNumber, moveVector, timeout);
-        // var command = new Commands(inputNumber, Input.GetKeyDown(KeyCode.W), Input.GetKeyDown(KeyCode.S),
-        //     Input.GetKeyDown(KeyCode.A), Input.GetKeyDown(KeyCode.D),
-        //     Input.GetKeyDown(KeyCode.Space), timeout);
-        commands.Add(command);
-        reconciliateCommands.Add(command);
+        if (clientCube?.port == null)
+        {
+            return;
+        }
+        
+        var command = ReadStoreInput();
 
+        // Read local input (input you dont store nor send to the server)
         if (Input.GetKeyDown(KeyCode.X))
         {
             tempDisconnect = true;
@@ -220,11 +264,28 @@ public class SimulationClient : MonoBehaviour
             //fakeChannel.Disconnect(FakeChannel.ChannelType.ACK);
         }
         
-        Apply(command);
+        Apply(command, clientCube, clientCharacterController);
+        SendInputs();
     }
-    
-    private void Apply(Commands command){
-        if(clientCubeCharController == null)
+
+    private Commands ReadStoreInput()
+    {
+        var timeout = Time.time + 2;
+        var moveVector = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        var command = new Commands(inputNumber, moveVector, timeout);
+        // var command = new Commands(inputNumber, Input.GetKeyDown(KeyCode.W), Input.GetKeyDown(KeyCode.S),
+        //     Input.GetKeyDown(KeyCode.A), Input.GetKeyDown(KeyCode.D),
+        //     Input.GetKeyDown(KeyCode.Space), timeout);
+        commands.Add(command);
+        reconciliateCommands.Add(command);
+        packetNumber++;
+        inputNumber++;
+
+        return command;
+    }
+
+    private void Apply(Commands command, CubeEntity client, CharacterController characterController){
+        if(client == null || characterController == null)
         {
             return;
         }
@@ -237,8 +298,30 @@ public class SimulationClient : MonoBehaviour
         // force += command.right ? Vector3.right * (200 * Time.fixedDeltaTime) : Vector3.zero;
         //
         // clientCubeRigidBody.AddForceAtPosition(force, Vector3.zero, ForceMode.Impulse);
+        float speed = 10;
+        float gravity = 9.800f;
+        Vector3 move = client.cubeGameObject.transform.forward * command.moveVector.y + 
+                       client.cubeGameObject.transform.right * command.moveVector.x; //command.moveVector + Vector3.down * gravity;
+        characterController.Move(command.moveVector * (speed * Time.fixedDeltaTime));
+    }
+    
+    private void SendInputs()
+    {
+        if (commands.Count != 0)
+        {
+            var packet = Packet.Obtain();
+            packet.buffer.PutInt((int) Utils.Ports.INPUT);
+            packet.buffer.PutInt(commands.Count);
+            foreach (var command in commands)
+            {
+                // print("----------------");
+                // print(command.inputNumber);
+                command.Serialize(packet.buffer);
+            }
+            packet.buffer.Flush();
 
-        clientCubeCharController.Move(command.moveVector * (10 * Time.fixedDeltaTime));
+            if (clientCube.port != null) fakeChannel.Send((int) clientCube.port, packet);
+        }
     }
 
     private void Join()
@@ -246,61 +329,48 @@ public class SimulationClient : MonoBehaviour
         var joinPacket = Packet.Obtain();
 
         // send random number to validate future PlayerJoined packet
-        joinPacket.buffer.PutInt(clientId);  // Not the actual clientId, just a way to know if the future PlayerJoined packet is yours
+        joinPacket.buffer.PutInt((int) Utils.Ports.JOIN);
+        joinPacket.buffer.PutInt(clientId);  // Not the actual clientId, just a random number to know if the future PlayerJoined packet is yours
         joinPacket.buffer.Flush();
-        fakeChannel.Send(9000, joinPacket, FakeChannel.ChannelType.JOIN);
+        fakeChannel.Send(9000, joinPacket);
+        joinPacket.Free();
     }
 
-    private void PlayerJoined()
+    private void PlayerJoined(Packet packet)
     {
         // wait for confirmation
-        Packet playerJoinedPacket;
-        int port = connected ? GetPort(clientId) : 9000; // until connected, the only port you can hear in is 9000, where you wait for your playerJoined confirmation
-        while ((playerJoinedPacket = fakeChannel.GetPacket(port, FakeChannel.ChannelType.PLAYER_JOINED)) != null)
+        var randomNumber = packet.buffer.GetInt();
+        var receivedId = packet.buffer.GetInt();
+
+        var cubeGO = Instantiate(clientCubePrefab, new Vector3(), Quaternion.identity);
+        var cube = new CubeEntity(cubeGO, receivedId);
+        cubeEntitiesClient.Add(cube);
+
+        print($"{randomNumber}, {receivedId}, {clientId}");
+        // if player joined is this client
+        if (!connected && randomNumber == clientId)
         {
-            var randomNumber = playerJoinedPacket.buffer.GetInt();
-            var receivedId = playerJoinedPacket.buffer.GetInt();
-
-            var cubeGO = Instantiate(clientCubePrefab, new Vector3(), Quaternion.identity);
-            var cube = new CubeEntity(cubeGO, receivedId);
-            cubeEntitiesClient.Add(cube);
-
-            if (randomNumber == clientId)
-            {
-                clientId = receivedId;  // Now clientId is real
-                clientCube = cube;
-                clientCubeCharController = clientCube.cubeGameObject.GetComponent<CharacterController>();
-                connected = true;
-            }
+            clientId = receivedId;  // Now clientId is real
+            clientCube = cube;
+            clientCube.port = 9000 + clientId;
+            print($"assigning client port {clientCube.port}");
+            clientCharacterController = clientCube.cubeGameObject.GetComponent<CharacterController>();
+            
+            var conciliateGO = Instantiate(clientReconciliateCubePrefab, new Vector3(), Quaternion.identity);
+            conciliateClientCube = new CubeEntity(conciliateGO, clientId);
+            conciliateCharacterController = conciliateClientCube.cubeGameObject.GetComponent<CharacterController>();
+            // conciliateCharacterController.transform.GetChild(1).gameObject.active = false;
+            // conciliateCharacterController.transform.GetChild(0).gameObject.active = false;
+            
+            connected = true;
         }
     }
-    
-    private int GetPort(int cubeID)
-    {
-        return fakeChannel.GetPort(cubeID);
-    }
-    
+
     private void SendPacket(Packet packet, Channel sendChannel)
     {
         string serverIP = "127.0.0.1";
         var remoteEp = new IPEndPoint(IPAddress.Parse(serverIP), sendChannel.port);
         sendChannel.Send(packet, remoteEp);
         packet.Free();
-    }
-
-    private bool Interpolate()
-    {
-        var previousTime = interpolationBuffer[0].packetNumber * (1f/pps);
-        var nextTime =  interpolationBuffer[1].packetNumber * (1f/pps);
-        var t =  (clientTime - previousTime) / (nextTime - previousTime);
-        var interpolatedSnapshot = Snapshot.CreateInterpolated(interpolationBuffer[0], interpolationBuffer[1], t);
-        interpolatedSnapshot.Apply(clientId);
-        
-        if(clientTime > nextTime) {
-            interpolationBuffer.RemoveAt(0);
-            return true;
-        }
-
-        return false;
     }
 }

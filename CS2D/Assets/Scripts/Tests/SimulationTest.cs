@@ -20,6 +20,8 @@ public class SimulationTest : MonoBehaviour
         
         + pasar applies a fixedupdate
         + en fixed de client aplicar input y enviar paquete con input (con un input number)
+    
+        TODO: OJO QUE POR AHI CONCILIATE USA UNA LAYER DISTINTA, CLONAR EL TP DE JUAN Y VER
     */
     
 }

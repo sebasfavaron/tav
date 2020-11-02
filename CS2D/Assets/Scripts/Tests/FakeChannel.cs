@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class FakeChannel : Singleton<FakeChannel>
 {
-    private Dictionary<int, Dictionary<ChannelType, List<Packet>>> channels; // <port, <channelType, packets>>
+    private Dictionary<int, List<Packet>> ports; // <port, packets>. One port per client
 
     public enum ChannelType
     {
@@ -21,44 +21,41 @@ public class FakeChannel : Singleton<FakeChannel>
     {
     }
 
-    public void Send(int port, Packet packet, ChannelType channelType)
+    public void Send(int port, Packet packet)
     {
-        List<Packet> channel = channels[port][channelType];
-        channel.Add(packet);
+        List<Packet> packets = ports[port];
+        packets.Add(packet);
     }
 
-    public Packet GetPacket(int port, ChannelType channelType)
+    public Packet GetPacket(int port)
     {
-        List<Packet> channel;
+        List<Packet> packets;
         try
         {
-            channel = channels[port][channelType];
+            packets = ports[port];
         }
         catch (KeyNotFoundException e)
         {
+            print("Key not found");
             return null;
         }
-        if (channel == null || channel.Count == 0)
+        if (packets == null || packets.Count == 0)
         {
             return null;
         }
 
-        var first = channel[0];
-        channel.RemoveAt(0);
+        var first = packets[0];
+        packets.RemoveAt(0);
         return first;
     }
 
     public void InitPorts(int port)
     {
-        if (channels == null)
+        if (ports == null)
         {
-            channels = new Dictionary<int, Dictionary<ChannelType, List<Packet>>>();
+            ports = new Dictionary<int, List<Packet>>();
         }
-        channels[port] = new Dictionary<ChannelType, List<Packet>>();
-        foreach (ChannelType i in Enum.GetValues(typeof(ChannelType)))
-        {
-            channels[port][i] = new List<Packet>();
-        }
+        ports[port] = new List<Packet>();
     }
 
     public int GetPort(int cubeID)

@@ -892,6 +892,8 @@ MonoBehaviour:
   requiredSnapshots: 5
   clientCubePrefab: {fileID: 5732492077391170865, guid: 1311777dcb5f1154a84cbc455218c953,
     type: 3}
+  clientReconciliateCubePrefab: {fileID: 220534595683379430, guid: de430e5b95a37294189396c2dd01131b,
+    type: 3}
 --- !u!4 &1739382822
 Transform:
   m_ObjectHideFlags: 0

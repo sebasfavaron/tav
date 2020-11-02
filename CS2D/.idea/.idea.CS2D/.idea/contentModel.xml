@@ -44,6 +44,7 @@
             <e p="SimulationServer.cs" t="Include" />
             <e p="SimulationTest.cs" t="Include" />
             <e p="Snapshot.cs" t="Include" />
+            <e p="Utils.cs" t="Include" />
           </e>
           <e p="Utils" t="Include">
             <e p="GameObjectPool.cs" t="Include" />

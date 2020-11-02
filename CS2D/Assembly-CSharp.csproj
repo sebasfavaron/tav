@@ -84,6 +84,7 @@
      <Compile Include="Assets\Scripts\Tests\SimulationServer.cs" />
      <Compile Include="Assets\Scripts\Tests\SimulationTest.cs" />
      <Compile Include="Assets\Scripts\Tests\Snapshot.cs" />
+     <Compile Include="Assets\Scripts\Tests\Utils.cs" />
      <Compile Include="Assets\Scripts\Utils\GameObjectPool.cs" />
      <Compile Include="Assets\Scripts\Utils\GenericPool.cs" />
      <Compile Include="Assets\Scripts\Utils\GenericPoolableObject.cs" />

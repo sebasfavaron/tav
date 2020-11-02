@@ -6,6 +6,7 @@ public class CubeEntity
 {
 
     public int id;
+    public int? port;
     public Vector3 position;
     public Quaternion rotation;
     public GameObject cubeGameObject;
@@ -14,6 +15,7 @@ public class CubeEntity
     {
         this.cubeGameObject = cubeGameObject;
         this.id = id;
+        this.port = null;
     }
 
     public CubeEntity(Vector3 position, Quaternion rotation, GameObject cubeGameObject)
@@ -21,6 +23,7 @@ public class CubeEntity
         this.position = position;
         this.rotation = rotation;
         this.cubeGameObject = cubeGameObject;
+        this.port = null;
     }
     
     public CubeEntity(CubeEntity original)
@@ -29,6 +32,7 @@ public class CubeEntity
         this.id = original.id;
         this.position = new Vector3(original.position.x, original.position.y, original.position.z);
         this.rotation = new Quaternion(original.rotation.x, original.rotation.y, original.rotation.z, original.rotation.w);
+        this.port = null;
     }
 
     public void Serialize(BitBuffer buffer)
