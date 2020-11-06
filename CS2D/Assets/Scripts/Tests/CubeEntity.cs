@@ -6,16 +6,22 @@ public class CubeEntity
 {
 
     public int id;
-    public int? port;
     public Vector3 position;
     public Quaternion rotation;
     public GameObject cubeGameObject;
 
+    // Connection info
+    public int? port;
+    public int maxInputReceived;
+    public int packetNumber;
+    
     public CubeEntity(GameObject cubeGameObject, int id)
     {
         this.cubeGameObject = cubeGameObject;
         this.id = id;
-        this.port = null;
+        this.port = Utils.GetPortFromId(id);
+        this.maxInputReceived = -1;
+        this.packetNumber = -1;
     }
 
     public CubeEntity(Vector3 position, Quaternion rotation, GameObject cubeGameObject)
@@ -24,6 +30,8 @@ public class CubeEntity
         this.rotation = rotation;
         this.cubeGameObject = cubeGameObject;
         this.port = null;
+        this.maxInputReceived = -1;
+        this.packetNumber = -1;
     }
     
     public CubeEntity(CubeEntity original)
@@ -33,12 +41,16 @@ public class CubeEntity
         this.position = new Vector3(original.position.x, original.position.y, original.position.z);
         this.rotation = new Quaternion(original.rotation.x, original.rotation.y, original.rotation.z, original.rotation.w);
         this.port = null;
+        this.maxInputReceived = -1;
+        this.packetNumber = -1;
     }
 
     public void Serialize(BitBuffer buffer)
     {
         position = cubeGameObject.transform.position;
         rotation = cubeGameObject.transform.rotation;
+        buffer.PutInt(maxInputReceived);
+        buffer.PutInt(packetNumber);
         buffer.PutFloat(position.x);
         buffer.PutFloat(position.y);
         buffer.PutFloat(position.z);
@@ -51,6 +63,8 @@ public class CubeEntity
     public void Deserialize(BitBuffer buffer) {
         position = new Vector3();
         rotation = new Quaternion();
+        maxInputReceived = buffer.GetInt();
+        packetNumber = buffer.GetInt();
         position.x = buffer.GetFloat();
         position.y = buffer.GetFloat();
         position.z = buffer.GetFloat();
@@ -71,6 +85,8 @@ public class CubeEntity
         rot.y = previous.rotation.y + deltaRot.y;
         rot.z = previous.rotation.z + deltaRot.z;
         cubeEntity.rotation = rot;
+        cubeEntity.maxInputReceived = Mathf.Max(previous.maxInputReceived, next.maxInputReceived);
+        cubeEntity.packetNumber = Mathf.Max(previous.packetNumber, next.packetNumber);
         return cubeEntity;
     }
 

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -12,21 +13,21 @@ public class SimulationServer : MonoBehaviour
     public int pps = 100;
     private int maxInput = 0;
 
-    private FakeChannel fakeChannel;
+    private Channel channel;
     
     [SerializeField] private GameObject serverCubePrefab;
-    private List<CubeEntity> cubeEntitiesServer;
+    private Dictionary<int, CubeEntity> cubeEntitiesServer;
     private List<int> randomNumbersReceived;
     private CharacterController characterController;
+    private Dictionary<int, int> sendPorts;
 
 
     // Start is called before the first frame update
     public void Start()
     {
-        fakeChannel = FakeChannel.Instance;
-        fakeChannel.InitPorts(9000);  // reserved port for initial joins and playerJoins
+        channel = new Channel(Utils.serverPort);
 
-        cubeEntitiesServer = new List<CubeEntity>();
+        cubeEntitiesServer = new Dictionary<int, CubeEntity>();
         randomNumbersReceived = new List<int>();
         characterController = GetComponent<CharacterController>();
     }
@@ -49,45 +50,25 @@ public class SimulationServer : MonoBehaviour
         }
 
         Packet packet;
-        foreach (var cubeEntity in cubeEntitiesServer)
-        {
-            while ((packet = fakeChannel.GetPacket((int) cubeEntity.port)) != null)
-            {
-                int type = packet.buffer.GetInt();
-                switch (type)
-                {
-                    case (int) Utils.Ports.INPUT:
-                        ReceiveInputs(packet, cubeEntity);
-                        break;
-                    default:
-                        print($"BAD message type on port {cubeEntity.port}");
-                        break;
-                }
-                packet.Free();
-            }
-        }
-        
-        if ((packet = fakeChannel.GetPacket(9000)) != null)
+        while ((packet = channel.GetPacket()) != null)
         {
             int type = packet.buffer.GetInt();
-            int other = packet.buffer.GetInt();
-            int other2 = packet.buffer.GetInt();
-            print($"receiving on port 9000 type {type} and other {other} {other2} (should be {(int) Utils.Ports.JOIN})");
-            if (type == (int) Utils.Ports.JOIN)
+            switch (type)
             {
-                // receive joins from new players (from port 9000 because they dont have a unique port yet)
-                ReceiveJoins(packet);
+                case (int) Utils.Ports.INPUT:
+                    ReceiveInputs(packet);
+                    break;
+                case (int) Utils.Ports.JOIN:
+                    ReceiveJoins(packet);
+                    break;
             }
-            else
-            {
-                print("BAD message type on port 9000");
-            }
-            packet.Free();
         }
     }
 
-    private void ReceiveInputs(Packet packet, CubeEntity cube)
+    private void ReceiveInputs(Packet packet)
     {
+        int id = packet.buffer.GetInt();
+        var cube = cubeEntitiesServer[Utils.GetPortFromId(id)];
         int max = 0, amountOfCommandsToProcess = packet.buffer.GetInt();
         for (int i = 0; i < amountOfCommandsToProcess; i++)
         {
@@ -106,24 +87,29 @@ public class SimulationServer : MonoBehaviour
         }
 
         // send ack
+        SendAck(max, (int) cube.port);
+    }
+
+    private void SendAck(int max, int port)
+    {
         var packet3 = Packet.Obtain();
         packet3.buffer.PutInt((int) Utils.Ports.ACK);
         packet3.buffer.PutInt(max);
         // var sendCube = new CubeEntity(Vector3.zero, Quaternion.identity, serverCubePrefab);
         // sendCube.Serialize(packet3.buffer);
         packet3.buffer.Flush();
-        fakeChannel.Send((int) cube.port, packet3);
+        Utils.Send(packet3, channel, port);
         maxInput = Mathf.Max(max, maxInput);
     }
-    
+
     private void ReceiveJoins(Packet packet)
     {
-        var rndNumber = packet.buffer.GetInt();
-        var existingPlayer = randomNumbersReceived.Contains(rndNumber);
+        int id = packet.buffer.GetInt();
+        var existingPlayer = randomNumbersReceived.Contains(id);
         if (!existingPlayer)
         {
-            PlayerJoined(rndNumber);
-            randomNumbersReceived.Add(rndNumber);    
+            PlayerJoined(id);
+            randomNumbersReceived.Add(id);    
         }
     }
     
@@ -140,64 +126,53 @@ public class SimulationServer : MonoBehaviour
         // }
         packetNumber++; // TODO: no sirve de nada, el packetNumber es uno por cliente
             
-        
-        foreach (var cube in cubeEntitiesServer)
+        foreach (var kv in cubeEntitiesServer)
         {
+            var cube = kv.Value;
+            
             // serialize
-            var snapshot = new Snapshot(packetNumber, maxInput, cubeEntitiesServer); // TODO: hacer esto custom por cada cliente (maxinput, packetnumber)
             var packet = Packet.Obtain();
             packet.buffer.PutInt((int) Utils.Ports.DATA);
+            var snapshot = new Snapshot(cubeEntitiesServer); // TODO: hacer esto custom por cada cliente (maxinput, packetnumber)
             snapshot.Serialize(packet.buffer);
             packet.buffer.Flush();
-            fakeChannel.Send((int) cube.port, packet);
-            packet.Free();
+            Utils.Send(packet, channel, (int) cube.port);
         }
     }
     
-    private void PlayerJoined(int rndNumber)  // Server
+    private void PlayerJoined(int id)  // Server
     {
-        if (cubeEntitiesServer.Count == 1000) // Not an actual limitation for FakeChannel
-        {
-            print($"Reached server limit (for port limitations). Not adding player with random number {rndNumber}");
-            return;
-        }
-        
-        var id = cubeEntitiesServer.Count + 1;
-
         // send player joined packet to everyone (including to the new player as a confirmation)
         Packet playerJoinedPacket = Packet.Obtain();
         playerJoinedPacket.buffer.PutInt((int) Utils.Ports.PLAYER_JOINED);
-        playerJoinedPacket.buffer.PutInt(rndNumber);
         playerJoinedPacket.buffer.PutInt(id);
         playerJoinedPacket.buffer.Flush();
-        print($"server sending {(int) Utils.Ports.PLAYER_JOINED}, {rndNumber}, {id}");
-        fakeChannel.Send(9000, playerJoinedPacket); // send it to new player
-        foreach (var cube in cubeEntitiesServer) // send it to the rest
-        {
-            fakeChannel.Send((int) cube.port, playerJoinedPacket);
-        }
         
         // init new player
         var serverCubeGO = Instantiate(serverCubePrefab, new Vector3(), Quaternion.identity);
         var serverCube = new CubeEntity(serverCubeGO, id);
-        serverCube.port = 9000 + id; // TODO: could missmatch with client port. Maybe send it
-        cubeEntitiesServer.Add(serverCube);
-        fakeChannel.InitPorts((int) serverCube.port); // init ports for new player
-    }
-    
-    private int GetPort(int cubeID)
-    {
-        return fakeChannel.GetPort(cubeID);
+        cubeEntitiesServer[(int) serverCube.port] = serverCube;
+        
+        foreach (var cube in cubeEntitiesServer.Values) // send it to the new player and the rest
+        {
+            Utils.Send(playerJoinedPacket, channel, (int) cube.port);
+        }
     }
 
     private void BotJoin() // Same as client's Join()
     {
         var joinPacket = Packet.Obtain();
+        var id = Random.Range(0, 1000000);
 
         // send id
         joinPacket.buffer.PutInt((int) Utils.Ports.JOIN);
-        joinPacket.buffer.PutInt(Random.Range(1,1000000));
+        joinPacket.buffer.PutInt(id);
         joinPacket.buffer.Flush();
-        fakeChannel.Send(9000, joinPacket);
+        ReceiveJoins(joinPacket);
+        joinPacket.Free();
+    }
+    
+    private void OnDestroy() {
+        channel.Disconnect();
     }
 }

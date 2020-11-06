@@ -20,12 +20,13 @@ public class SimulationClient : MonoBehaviour
     private bool clientPlaying = false;
     private bool connected = false;
     private bool tempDisconnect = false;
+    private readonly int serverPort = Utils.serverPort;
 
-    private FakeChannel fakeChannel;
+    private Channel channel;
 
     [SerializeField] private GameObject clientCubePrefab;
     [SerializeField] private GameObject clientReconciliateCubePrefab;
-    private List<CubeEntity> cubeEntitiesClient;
+    private Dictionary<int, CubeEntity> cubeEntitiesClient;
 
     List<Snapshot> interpolationBuffer = new List<Snapshot>();
     List<Commands> commands = new List<Commands>();
@@ -33,15 +34,15 @@ public class SimulationClient : MonoBehaviour
     private int clientId;
     private CubeEntity clientCube = null;
     private CharacterController clientCharacterController = null;
-    private CubeEntity conciliateClientCube;
-    private CharacterController conciliateCharacterController;
+    private CubeEntity reconciliateClientCube;
+    private CharacterController reconciliateCharacterController;
 
     // Start is called before the first frame update
     public void Start()
     {
-        fakeChannel = FakeChannel.Instance;
-        cubeEntitiesClient = new List<CubeEntity>();
+        cubeEntitiesClient = new Dictionary<int, CubeEntity>();
         clientId = Random.Range(0, 1000000);
+        channel = new Channel(Utils.GetPortFromId(clientId));
     }
 
     private void FixedUpdate()
@@ -95,37 +96,27 @@ public class SimulationClient : MonoBehaviour
         //     }
         // }
 
-        Packet packet;
-        if (connected)
+        if (!connected)
         {
-            while ((packet = fakeChannel.GetPacket((int) clientCube.port)) != null)
-            {
-                int type = packet.buffer.GetInt();
-                switch (type)
-                {
-                    case (int) Utils.Ports.ACK:
-                        AckInputs(packet);
-                        break;
-                    case (int) Utils.Ports.DATA:
-                        ReceiveData(packet);
-                        break;
-                    case (int) Utils.Ports.PLAYER_JOINED:
-                        PlayerJoined(packet);
-                        // JoinActions(packet);
-                        break;
-                }
-
-                packet.Free();
-            }
-        }
-        else
-        {
-            packet = fakeChannel.GetPacket(9000);
-            if (packet != null)
-            {
-                PlayerJoined(packet);
-            }
             Join(); // TODO: spam? maybe bring cooldown back for this only
+        }
+        
+        Packet packet;
+        while ((packet = channel.GetPacket()) != null)
+        {
+            int type = packet.buffer.GetInt();
+            switch (type)
+            {
+                case (int) Utils.Ports.ACK:
+                    AckInputs(packet);
+                    break;
+                case (int) Utils.Ports.DATA:
+                    ReceiveData(packet);
+                    break;
+                case (int) Utils.Ports.PLAYER_JOINED:
+                    PlayerJoined(packet);
+                    break;
+            }
         }
 
         InterpolateAndReconciliate();
@@ -133,44 +124,47 @@ public class SimulationClient : MonoBehaviour
 
     private void JoinActions(Packet packet)
     {
-        int? port = connected ? clientCube.port : 9000; // until connected, the only port you can hear in is 9000, where you wait for your playerJoined confirmation
-
         PlayerJoined(packet);
         if (!connected)
         {
-            Join(); // TODO: spam? maybe bring cooldown back for this only
+            Join();
         }
     }
 
     private void AckInputs(Packet packet)
     {
-        Packet packet3;
-        while ( (packet3=fakeChannel.GetPacket((int) Utils.Ports.ACK)) != null)
+        if (!connected) return;
+        
+        var toDel = packet.buffer.GetInt();
+        // clientInServer = new CubeEntity(Vector3.zero, Quaternion.identity, clientCubePrefab);
+        // clientInServer.Deserialize(packet3.buffer);
+        while (commands.Count > 0 && commands[0].inputNumber <= toDel)
         {
-            var toDel = packet3.buffer.GetInt();
-            // clientInServer = new CubeEntity(Vector3.zero, Quaternion.identity, clientCubePrefab);
-            // clientInServer.Deserialize(packet3.buffer);
-            while (commands.Count > 0 && commands[0].inputNumber <= toDel)
-            {
-                commands.RemoveAt(0);
-            }
+            commands.RemoveAt(0);
         }
     }
     
     private void ReceiveData(Packet packet)
     {
-        var snapshot = new Snapshot(-1, -1, cubeEntitiesClient);
-
+        if(!connected) return;
+        
+        var snapshot = new Snapshot(cubeEntitiesClient);
         snapshot.Deserialize(packet.buffer);
 
         int size = interpolationBuffer.Count;
-        if((size == 0 || snapshot.packetNumber > interpolationBuffer[size - 1].packetNumber) && size < requiredSnapshots + 1) {
+        var newClientCube = snapshot.cubeEntities[(int) clientCube.port];
+        bool cond = (size == 0 || newClientCube.packetNumber >
+                        interpolationBuffer[size - 1].cubeEntities[(int) clientCube.port].packetNumber) &&
+                    size < requiredSnapshots + 1;
+        if(size != 0) print($"{newClientCube.packetNumber} > {interpolationBuffer[size - 1].cubeEntities[(int) clientCube.port].packetNumber}");
+        if(cond) {
             interpolationBuffer.Add(snapshot);
         }
     }
 
     private void InterpolateAndReconciliate()
     {
+        print($"{interpolationBuffer.Count}, {requiredSnapshots}");
         while (interpolationBuffer.Count >= requiredSnapshots)
         {
             Interpolate();
@@ -180,8 +174,8 @@ public class SimulationClient : MonoBehaviour
     
     private void Interpolate()
     {
-        var previousTime = interpolationBuffer[0].packetNumber * (1f/pps);
-        var nextTime =  interpolationBuffer[1].packetNumber * (1f/pps);
+        var previousTime = interpolationBuffer[0].cubeEntities[(int) clientCube.port].packetNumber * (1f/pps);
+        var nextTime =  interpolationBuffer[1].cubeEntities[(int) clientCube.port].packetNumber * (1f/pps);
         var t =  (clientTime - previousTime) / (nextTime - previousTime);
         var interpolatedSnapshot = Snapshot.CreateInterpolated(interpolationBuffer[0], interpolationBuffer[1], t);
         interpolatedSnapshot.Apply(clientId);
@@ -193,6 +187,7 @@ public class SimulationClient : MonoBehaviour
 
     private void Reconciliate()
     {
+        print("commands.Count");
         var max = 0;
         // Snapshot lastServerSnapshot = null;
         // interpolationBuffer.ForEach(snapshot =>
@@ -202,8 +197,7 @@ public class SimulationClient : MonoBehaviour
         //         lastServerSnapshot = snapshot;
         //     }
         // });
-        var lastServerSnapshot = interpolationBuffer[interpolationBuffer.Count - 1];
-        var clientInServer = lastServerSnapshot.cubeEntities.Find(c => c.id == clientId);
+        var clientInServer = interpolationBuffer[interpolationBuffer.Count - 1].cubeEntities[(int) clientCube.port];
         
         // 1. Deactivate real client
         // 2. Instantiate fake client
@@ -216,8 +210,8 @@ public class SimulationClient : MonoBehaviour
         // 2. Tp client to client's position in server
         // clientCubeRigidBody.position = clientInServer.position; // WARN: capaz tengo que hacer deep copy
         // clientCubeRigidBody.rotation = clientInServer.rotation; // WARN: capaz tengo que hacer deep copy
-        conciliateClientCube.cubeGameObject.transform.position = clientInServer.position;
-        conciliateClientCube.cubeGameObject.transform.rotation = clientInServer.rotation;
+        reconciliateClientCube.cubeGameObject.transform.position = clientInServer.position;
+        reconciliateClientCube.cubeGameObject.transform.rotation = clientInServer.rotation;
 
         // 3. Simulate movements from 'commands' list (all commands not confirmed by server)
         // var toRemove = new List<Commands>();
@@ -235,16 +229,12 @@ public class SimulationClient : MonoBehaviour
         // toRemove.ForEach(c => reconciliateCommands.Remove(c));
         foreach (var command in commands)
         {
-            Apply(command, conciliateClientCube, conciliateCharacterController);
+            Apply(command, reconciliateClientCube, reconciliateCharacterController);
         }
 
         // 4. Apply reconciliate position and rotation to client
-        var reconciliatePos = conciliateClientCube.cubeGameObject.transform.position;
-        var clientPos = clientCube.cubeGameObject.transform.position;
-
-        var yPos = Math.Abs(reconciliatePos.y - clientPos.y) > 4 ? reconciliatePos.y : clientPos.y; // TODO: remove this check, just apply reconciliate pos to client
-        clientCube.cubeGameObject.transform.position = new Vector3(reconciliatePos.x, yPos, reconciliatePos.z);
-        clientCube.cubeGameObject.transform.rotation = conciliateClientCube.cubeGameObject.transform.rotation;
+        clientCube.cubeGameObject.transform.position = reconciliateClientCube.cubeGameObject.transform.position;
+        clientCube.cubeGameObject.transform.rotation = reconciliateClientCube.cubeGameObject.transform.rotation;
     }
 
     private void ReadStoreApplySendInput()
@@ -311,6 +301,7 @@ public class SimulationClient : MonoBehaviour
         {
             var packet = Packet.Obtain();
             packet.buffer.PutInt((int) Utils.Ports.INPUT);
+            packet.buffer.PutInt(clientId);
             packet.buffer.PutInt(commands.Count);
             foreach (var command in commands)
             {
@@ -320,7 +311,7 @@ public class SimulationClient : MonoBehaviour
             }
             packet.buffer.Flush();
 
-            if (clientCube.port != null) fakeChannel.Send((int) clientCube.port, packet);
+            if (clientCube.port != null) Utils.Send(packet, channel, serverPort);
         }
     }
 
@@ -330,47 +321,38 @@ public class SimulationClient : MonoBehaviour
 
         // send random number to validate future PlayerJoined packet
         joinPacket.buffer.PutInt((int) Utils.Ports.JOIN);
-        joinPacket.buffer.PutInt(clientId);  // Not the actual clientId, just a random number to know if the future PlayerJoined packet is yours
+        joinPacket.buffer.PutInt(clientId);
         joinPacket.buffer.Flush();
-        fakeChannel.Send(9000, joinPacket);
-        joinPacket.Free();
+        Utils.Send(joinPacket, channel, serverPort);
+        // joinPacket.Free();
     }
 
     private void PlayerJoined(Packet packet)
     {
         // wait for confirmation
-        var randomNumber = packet.buffer.GetInt();
         var receivedId = packet.buffer.GetInt();
 
         var cubeGO = Instantiate(clientCubePrefab, new Vector3(), Quaternion.identity);
         var cube = new CubeEntity(cubeGO, receivedId);
-        cubeEntitiesClient.Add(cube);
+        cubeEntitiesClient[(int) cube.port] = cube;
 
-        print($"{randomNumber}, {receivedId}, {clientId}");
         // if player joined is this client
-        if (!connected && randomNumber == clientId)
+        if (!connected && receivedId == clientId)
         {
-            clientId = receivedId;  // Now clientId is real
             clientCube = cube;
-            clientCube.port = 9000 + clientId;
-            print($"assigning client port {clientCube.port}");
             clientCharacterController = clientCube.cubeGameObject.GetComponent<CharacterController>();
             
             var conciliateGO = Instantiate(clientReconciliateCubePrefab, new Vector3(), Quaternion.identity);
-            conciliateClientCube = new CubeEntity(conciliateGO, clientId);
-            conciliateCharacterController = conciliateClientCube.cubeGameObject.GetComponent<CharacterController>();
+            reconciliateClientCube = new CubeEntity(conciliateGO, clientId);
+            reconciliateCharacterController = reconciliateClientCube.cubeGameObject.GetComponent<CharacterController>();
             // conciliateCharacterController.transform.GetChild(1).gameObject.active = false;
             // conciliateCharacterController.transform.GetChild(0).gameObject.active = false;
             
             connected = true;
         }
     }
-
-    private void SendPacket(Packet packet, Channel sendChannel)
-    {
-        string serverIP = "127.0.0.1";
-        var remoteEp = new IPEndPoint(IPAddress.Parse(serverIP), sendChannel.port);
-        sendChannel.Send(packet, remoteEp);
-        packet.Free();
+    
+    private void OnDestroy() {
+        channel.Disconnect();
     }
 }

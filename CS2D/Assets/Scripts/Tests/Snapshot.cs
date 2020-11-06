@@ -1,60 +1,56 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class Snapshot
 {
-    public List<CubeEntity> cubeEntities;
-    public int packetNumber;
-    public int inputNumber;  // last input processed
+    public Dictionary<int, CubeEntity> cubeEntities;
 
-    public Snapshot(int packetNumber, int inputNumber, List<CubeEntity> cubeEntities)
+    public Snapshot(Dictionary<int, CubeEntity> cubeEntities)
     {
         this.cubeEntities = cubeEntities;
-        this.packetNumber = packetNumber;
-        this.inputNumber = inputNumber;
     }
     
     public void Serialize(BitBuffer buffer)
     {
-        buffer.PutInt(packetNumber);
-        buffer.PutInt(inputNumber);
-        cubeEntities.ForEach(c => c.Serialize(buffer));
+        foreach (var kv in cubeEntities)
+        {
+            kv.Value.Serialize(buffer);
+        }
     }
     
     public void Deserialize(BitBuffer buffer)
     {
-        packetNumber = buffer.GetInt();
-        inputNumber = buffer.GetInt();
-        cubeEntities.ForEach(c =>
+        foreach (var kv in cubeEntities)
         {
             if (buffer.HasRemaining())  // In case new players haven't been added to the client yet
             {
-                c.Deserialize(buffer);
+                kv.Value.Deserialize(buffer);
             }
-        });
+        }
     }
     
     public static Snapshot CreateInterpolated(Snapshot previous, Snapshot next, float t)
     {
-        List<CubeEntity> cubeEntities = new List<CubeEntity>();
-        for (int i = 0; i < previous.cubeEntities.Count; i++)
+        Dictionary<int, CubeEntity> cubeEntities = new Dictionary<int, CubeEntity>();
+        foreach (var kv in previous.cubeEntities)
         {
-            cubeEntities.Add(CubeEntity.createInterpolated(previous.cubeEntities[i], next.cubeEntities[i], t));
+            cubeEntities[kv.Key] = CubeEntity.createInterpolated(previous.cubeEntities[kv.Key], next.cubeEntities[kv.Key], t);
         }
-        return new Snapshot(-1, -1, cubeEntities);
+        return new Snapshot(cubeEntities);
     }
 
     public void Apply(int clientId)
     {
-        cubeEntities.ForEach(c =>
+        foreach (var cubeEntity in cubeEntities)
         {
-            if (c.id != clientId) // Do not interpolate client
+            if (cubeEntity.Value.id != clientId) // Do not interpolate client
             {
-                c.Apply();
+                cubeEntity.Value.Apply();
             }
-        });
+        }
     }
 
 }

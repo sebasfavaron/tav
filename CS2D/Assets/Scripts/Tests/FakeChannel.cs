@@ -23,6 +23,10 @@ public class FakeChannel : Singleton<FakeChannel>
 
     public void Send(int port, Packet packet)
     {
+        if (!ports.ContainsKey(port))
+        {
+            InitPort(port);
+        }
         List<Packet> packets = ports[port];
         packets.Add(packet);
     }
@@ -36,7 +40,7 @@ public class FakeChannel : Singleton<FakeChannel>
         }
         catch (KeyNotFoundException e)
         {
-            print("Key not found");
+            InitPort(port);
             return null;
         }
         if (packets == null || packets.Count == 0)
@@ -45,11 +49,17 @@ public class FakeChannel : Singleton<FakeChannel>
         }
 
         var first = packets[0];
-        packets.RemoveAt(0);
+        // packets.RemoveAt(0);
         return first;
     }
 
-    public void InitPorts(int port)
+    public void Free(int port, Packet packet)
+    {
+        // var packets = ports[port];
+        // packets.Remove(packet);
+    }
+
+    public void InitPort(int port)
     {
         if (ports == null)
         {
