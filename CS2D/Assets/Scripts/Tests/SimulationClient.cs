@@ -152,10 +152,6 @@ public class SimulationClient : MonoBehaviour
 
         // I check with client's packetNumber but they are all the same
         bool cond = (bufferSize == 0 || newPacketNumber > lastBufferPacketNumber) && bufferSize < requiredSnapshots + 1;
-        if (bufferSize != 0)
-        {
-            print($"{newPacketNumber - lastBufferPacketNumber}, {interpolationBuffer.Count}, {lastBufferPacketNumber}");
-        }
         if(cond) {
             interpolationBuffer.Add(snapshot);
         }
@@ -163,7 +159,6 @@ public class SimulationClient : MonoBehaviour
 
     private void InterpolateAndReconciliate()
     {
-        print($"{interpolationBuffer.Count} >= {requiredSnapshots}");
         while (interpolationBuffer.Count >= requiredSnapshots && !tempDisconnect)
         {
             Interpolate();
