@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
@@ -47,8 +48,6 @@ public class SimulationClient : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // if (!connected) return; // TODO: creo que tengo que sacar este check, por ahi me genera el desfazaje
-
         ReadStoreApplySendInput(); // TODO: not using sendrate/pps?
         // float sendRate = (1f / pps);
         // accum += Time.deltaTime;
@@ -88,11 +87,6 @@ public class SimulationClient : MonoBehaviour
         //         tempDisconnect = false;
         //         //fakeChannel.Connect(FakeChannel.ChannelType.INPUT);
         //         //fakeChannel.Connect(FakeChannel.ChannelType.ACK);
-        //     }
-        //     else
-        //     {
-        //         // Exit early if i'm disconnected
-        //         return; // TODO: check if this is necessary or just generating el desfazaje
         //     }
         // }
 
@@ -151,12 +145,13 @@ public class SimulationClient : MonoBehaviour
         var snapshot = new Snapshot(cubeEntitiesClient);
         snapshot.Deserialize(packet.buffer);
 
-        int size = interpolationBuffer.Count;
-        var newClientCube = snapshot.cubeEntities[(int) clientCube.port];
-        bool cond = (size == 0 || newClientCube.packetNumber >
-                        interpolationBuffer[size - 1].cubeEntities[(int) clientCube.port].packetNumber) &&
-                    size < requiredSnapshots + 1;
-        if(size != 0) print($"{newClientCube.packetNumber} > {interpolationBuffer[size - 1].cubeEntities[(int) clientCube.port].packetNumber}");
+        int bufferSize = interpolationBuffer.Count;
+        var newPacketNumber = snapshot.cubeEntities[clientCube.port].packetNumber;
+        var lastBufferPacketNumber = bufferSize != 0 ? interpolationBuffer[bufferSize - 1].cubeEntities[clientCube.port].packetNumber : -1;
+        
+        // I check with client's packetNumber but they are all the same
+        bool cond = (bufferSize == 0 || newPacketNumber > lastBufferPacketNumber) && bufferSize < requiredSnapshots + 1;
+        if(bufferSize != 0) print($"{newPacketNumber} > {lastBufferPacketNumber}, {interpolationBuffer.Count}");
         if(cond) {
             interpolationBuffer.Add(snapshot);
         }
@@ -164,8 +159,8 @@ public class SimulationClient : MonoBehaviour
 
     private void InterpolateAndReconciliate()
     {
-        print($"{interpolationBuffer.Count}, {requiredSnapshots}");
-        while (interpolationBuffer.Count >= requiredSnapshots)
+        // print($"{interpolationBuffer.Count} >= {requiredSnapshots}");
+        while (interpolationBuffer.Count >= requiredSnapshots && !tempDisconnect)
         {
             Interpolate();
             Reconciliate();    
@@ -174,8 +169,8 @@ public class SimulationClient : MonoBehaviour
     
     private void Interpolate()
     {
-        var previousTime = interpolationBuffer[0].cubeEntities[(int) clientCube.port].packetNumber * (1f/pps);
-        var nextTime =  interpolationBuffer[1].cubeEntities[(int) clientCube.port].packetNumber * (1f/pps);
+        var previousTime = interpolationBuffer[0].cubeEntities[clientCube.port].packetNumber * (1f/pps);
+        var nextTime =  interpolationBuffer[1].cubeEntities[clientCube.port].packetNumber * (1f/pps);
         var t =  (clientTime - previousTime) / (nextTime - previousTime);
         var interpolatedSnapshot = Snapshot.CreateInterpolated(interpolationBuffer[0], interpolationBuffer[1], t);
         interpolatedSnapshot.Apply(clientId);
@@ -197,7 +192,7 @@ public class SimulationClient : MonoBehaviour
         //         lastServerSnapshot = snapshot;
         //     }
         // });
-        var clientInServer = interpolationBuffer[interpolationBuffer.Count - 1].cubeEntities[(int) clientCube.port];
+        var clientInServer = interpolationBuffer[interpolationBuffer.Count - 1].cubeEntities[clientCube.port];
         
         // 1. Deactivate real client
         // 2. Instantiate fake client
@@ -239,7 +234,7 @@ public class SimulationClient : MonoBehaviour
 
     private void ReadStoreApplySendInput()
     {
-        if (clientCube?.port == null)
+        if (clientCube?.port < 0)
         {
             return;
         }
@@ -263,9 +258,7 @@ public class SimulationClient : MonoBehaviour
         var timeout = Time.time + 2;
         var moveVector = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
         var command = new Commands(inputNumber, moveVector, timeout);
-        // var command = new Commands(inputNumber, Input.GetKeyDown(KeyCode.W), Input.GetKeyDown(KeyCode.S),
-        //     Input.GetKeyDown(KeyCode.A), Input.GetKeyDown(KeyCode.D),
-        //     Input.GetKeyDown(KeyCode.Space), timeout);
+        
         commands.Add(command);
         reconciliateCommands.Add(command);
         packetNumber++;
@@ -280,19 +273,12 @@ public class SimulationClient : MonoBehaviour
             return;
         }
         
-        // Vector3 force = Vector3.zero;
-        // force += command.space ? Vector3.up * (500 * Time.fixedDeltaTime) : Vector3.zero;
-        // force += command.up ? Vector3.forward * (200 * Time.fixedDeltaTime) : Vector3.zero;
-        // force += command.down ? Vector3.back * (200 * Time.fixedDeltaTime) : Vector3.zero;
-        // force += command.left ? Vector3.left * (200 * Time.fixedDeltaTime) : Vector3.zero;
-        // force += command.right ? Vector3.right * (200 * Time.fixedDeltaTime) : Vector3.zero;
-        //
-        // clientCubeRigidBody.AddForceAtPosition(force, Vector3.zero, ForceMode.Impulse);
         float speed = 10;
         float gravity = 9.800f;
         Vector3 move = client.cubeGameObject.transform.forward * command.moveVector.y + 
                        client.cubeGameObject.transform.right * command.moveVector.x; //command.moveVector + Vector3.down * gravity;
         characterController.Move(command.moveVector * (speed * Time.fixedDeltaTime));
+        client.packetNumber = command.inputNumber;
     }
     
     private void SendInputs()
@@ -311,7 +297,7 @@ public class SimulationClient : MonoBehaviour
             }
             packet.buffer.Flush();
 
-            if (clientCube.port != null) Utils.Send(packet, channel, serverPort);
+            if (connected && clientCube.port >= 0) Utils.Send(packet, channel, serverPort);
         }
     }
 
@@ -334,7 +320,7 @@ public class SimulationClient : MonoBehaviour
 
         var cubeGO = Instantiate(clientCubePrefab, new Vector3(), Quaternion.identity);
         var cube = new CubeEntity(cubeGO, receivedId);
-        cubeEntitiesClient[(int) cube.port] = cube;
+        cubeEntitiesClient[cube.port] = cube;
 
         // if player joined is this client
         if (!connected && receivedId == clientId)

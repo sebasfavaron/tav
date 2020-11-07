@@ -75,19 +75,17 @@ public class SimulationServer : MonoBehaviour
             var command = new Commands();
             command.Deserialize(packet.buffer);
 
-            if (command.inputNumber <= maxInput)
+            if (command.inputNumber > maxInput)
             {
-                // print(command.inputNumber);
-                // TODO: fix double sending of command in ack instead of this ugly "fix"
-                return;
+                cube.cubeGameObject.GetComponent<CharacterController>().Move(command.moveVector * (10 * Time.fixedDeltaTime));
+                
+                max = Mathf.Max(command.inputNumber, max);
             }
-            cube.cubeGameObject.GetComponent<CharacterController>().Move(command.moveVector * (10 * Time.fixedDeltaTime));
-
-            max = Mathf.Max(command.inputNumber, max);
         }
+        cube.packetNumber = max;
 
         // send ack
-        SendAck(max, (int) cube.port);
+        SendAck(max, cube.port);
     }
 
     private void SendAck(int max, int port)
@@ -124,7 +122,7 @@ public class SimulationServer : MonoBehaviour
         //     // Restart accum
         //     accum -= sendRate;
         // }
-        packetNumber++; // TODO: no sirve de nada, el packetNumber es uno por cliente
+        packetNumber++; // TODO: no sirve de nada, el packetNumber es uno por cliente. Por ahora anda porque estoy probando con un solo cliente
             
         foreach (var kv in cubeEntitiesServer)
         {
@@ -136,7 +134,7 @@ public class SimulationServer : MonoBehaviour
             var snapshot = new Snapshot(cubeEntitiesServer); // TODO: hacer esto custom por cada cliente (maxinput, packetnumber)
             snapshot.Serialize(packet.buffer);
             packet.buffer.Flush();
-            Utils.Send(packet, channel, (int) cube.port);
+            Utils.Send(packet, channel, cube.port);
         }
     }
     
@@ -151,11 +149,11 @@ public class SimulationServer : MonoBehaviour
         // init new player
         var serverCubeGO = Instantiate(serverCubePrefab, new Vector3(), Quaternion.identity);
         var serverCube = new CubeEntity(serverCubeGO, id);
-        cubeEntitiesServer[(int) serverCube.port] = serverCube;
+        cubeEntitiesServer[serverCube.port] = serverCube;
         
         foreach (var cube in cubeEntitiesServer.Values) // send it to the new player and the rest
         {
-            Utils.Send(playerJoinedPacket, channel, (int) cube.port);
+            Utils.Send(playerJoinedPacket, channel, cube.port);
         }
     }
 

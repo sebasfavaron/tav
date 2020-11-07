@@ -11,7 +11,7 @@ public class CubeEntity
     public GameObject cubeGameObject;
 
     // Connection info
-    public int? port;
+    public int port;
     public int maxInputReceived;
     public int packetNumber;
     
@@ -29,7 +29,7 @@ public class CubeEntity
         this.position = position;
         this.rotation = rotation;
         this.cubeGameObject = cubeGameObject;
-        this.port = null;
+        this.port = -1;
         this.maxInputReceived = -1;
         this.packetNumber = -1;
     }
@@ -40,7 +40,7 @@ public class CubeEntity
         this.id = original.id;
         this.position = new Vector3(original.position.x, original.position.y, original.position.z);
         this.rotation = new Quaternion(original.rotation.x, original.rotation.y, original.rotation.z, original.rotation.w);
-        this.port = null;
+        this.port = -1;
         this.maxInputReceived = -1;
         this.packetNumber = -1;
     }
