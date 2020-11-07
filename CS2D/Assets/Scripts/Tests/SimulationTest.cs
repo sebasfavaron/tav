@@ -23,6 +23,8 @@ public class SimulationTest : MonoBehaviour
         
         ver de agregar un mensaje inicial con todos los jugadores que ya se conectaron (cuando ande reconciliacion con un solo cliente ja..)
         tambien, si el random que manda el client ya lo mando otro client no se va a poder conectar. Habria que generar otro hasta que conecte o hacer algo
+        
+        TODO: solve mistery: no new snapshot added to interpolation buffer but packetNumbers in internal cube changing
     */
     
 }

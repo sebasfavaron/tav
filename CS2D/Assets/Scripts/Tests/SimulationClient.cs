@@ -141,17 +141,21 @@ public class SimulationClient : MonoBehaviour
     private void ReceiveData(Packet packet)
     {
         if(!connected) return;
-        
-        var snapshot = new Snapshot(cubeEntitiesClient);
+
+        var snapshot = new Snapshot(cubeEntitiesClient, -1);
         snapshot.Deserialize(packet.buffer);
 
         int bufferSize = interpolationBuffer.Count;
-        var newPacketNumber = snapshot.cubeEntities[clientCube.port].packetNumber;
-        var lastBufferPacketNumber = bufferSize != 0 ? interpolationBuffer[bufferSize - 1].cubeEntities[clientCube.port].packetNumber : -1;
-        
+        var lastBufferPacketNumber = bufferSize != 0 ? interpolationBuffer[bufferSize - 1].packetNumber : -1;
+
+        int newPacketNumber = snapshot.packetNumber;
+
         // I check with client's packetNumber but they are all the same
         bool cond = (bufferSize == 0 || newPacketNumber > lastBufferPacketNumber) && bufferSize < requiredSnapshots + 1;
-        if(bufferSize != 0) print($"{newPacketNumber} > {lastBufferPacketNumber}, {interpolationBuffer.Count}");
+        if (bufferSize != 0)
+        {
+            print($"{newPacketNumber - lastBufferPacketNumber}, {interpolationBuffer.Count}, {lastBufferPacketNumber}");
+        }
         if(cond) {
             interpolationBuffer.Add(snapshot);
         }
@@ -159,7 +163,7 @@ public class SimulationClient : MonoBehaviour
 
     private void InterpolateAndReconciliate()
     {
-        // print($"{interpolationBuffer.Count} >= {requiredSnapshots}");
+        print($"{interpolationBuffer.Count} >= {requiredSnapshots}");
         while (interpolationBuffer.Count >= requiredSnapshots && !tempDisconnect)
         {
             Interpolate();
@@ -169,8 +173,8 @@ public class SimulationClient : MonoBehaviour
     
     private void Interpolate()
     {
-        var previousTime = interpolationBuffer[0].cubeEntities[clientCube.port].packetNumber * (1f/pps);
-        var nextTime =  interpolationBuffer[1].cubeEntities[clientCube.port].packetNumber * (1f/pps);
+        var previousTime = interpolationBuffer[0].packetNumber * (1f/pps);
+        var nextTime =  interpolationBuffer[1].packetNumber * (1f/pps);
         var t =  (clientTime - previousTime) / (nextTime - previousTime);
         var interpolatedSnapshot = Snapshot.CreateInterpolated(interpolationBuffer[0], interpolationBuffer[1], t);
         interpolatedSnapshot.Apply(clientId);
@@ -182,7 +186,6 @@ public class SimulationClient : MonoBehaviour
 
     private void Reconciliate()
     {
-        print("commands.Count");
         var max = 0;
         // Snapshot lastServerSnapshot = null;
         // interpolationBuffer.ForEach(snapshot =>
@@ -273,12 +276,11 @@ public class SimulationClient : MonoBehaviour
             return;
         }
         
-        float speed = 10;
-        float gravity = 9.800f;
-        Vector3 move = client.cubeGameObject.transform.forward * command.moveVector.y + 
-                       client.cubeGameObject.transform.right * command.moveVector.x; //command.moveVector + Vector3.down * gravity;
-        characterController.Move(command.moveVector * (speed * Time.fixedDeltaTime));
-        client.packetNumber = command.inputNumber;
+        float gravity = Utils.gravity;
+        float speed = Utils.speed;
+        Vector3 move = client.cubeGameObject.transform.forward * command.moveVector.z + 
+                       client.cubeGameObject.transform.right * command.moveVector.x + command.moveVector + Vector3.down * gravity;
+        characterController.Move(move * (speed * Time.fixedDeltaTime));
     }
     
     private void SendInputs()

@@ -13,7 +13,6 @@ public class CubeEntity
     // Connection info
     public int port;
     public int maxInputReceived;
-    public int packetNumber;
     
     public CubeEntity(GameObject cubeGameObject, int id)
     {
@@ -21,7 +20,6 @@ public class CubeEntity
         this.id = id;
         this.port = Utils.GetPortFromId(id);
         this.maxInputReceived = -1;
-        this.packetNumber = -1;
     }
 
     public CubeEntity(Vector3 position, Quaternion rotation, GameObject cubeGameObject)
@@ -31,7 +29,6 @@ public class CubeEntity
         this.cubeGameObject = cubeGameObject;
         this.port = -1;
         this.maxInputReceived = -1;
-        this.packetNumber = -1;
     }
     
     public CubeEntity(CubeEntity original)
@@ -42,7 +39,6 @@ public class CubeEntity
         this.rotation = new Quaternion(original.rotation.x, original.rotation.y, original.rotation.z, original.rotation.w);
         this.port = -1;
         this.maxInputReceived = -1;
-        this.packetNumber = -1;
     }
 
     public void Serialize(BitBuffer buffer)
@@ -50,7 +46,6 @@ public class CubeEntity
         position = cubeGameObject.transform.position;
         rotation = cubeGameObject.transform.rotation;
         buffer.PutInt(maxInputReceived);
-        buffer.PutInt(packetNumber);
         buffer.PutFloat(position.x);
         buffer.PutFloat(position.y);
         buffer.PutFloat(position.z);
@@ -64,7 +59,6 @@ public class CubeEntity
         position = new Vector3();
         rotation = new Quaternion();
         maxInputReceived = buffer.GetInt();
-        packetNumber = buffer.GetInt();
         position.x = buffer.GetFloat();
         position.y = buffer.GetFloat();
         position.z = buffer.GetFloat();
@@ -86,7 +80,6 @@ public class CubeEntity
         rot.z = previous.rotation.z + deltaRot.z;
         cubeEntity.rotation = rot;
         cubeEntity.maxInputReceived = Mathf.Max(previous.maxInputReceived, next.maxInputReceived);
-        cubeEntity.packetNumber = Mathf.Max(previous.packetNumber, next.packetNumber);
         return cubeEntity;
     }
 

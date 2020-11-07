@@ -7,14 +7,17 @@ using UnityEngine;
 public class Snapshot
 {
     public Dictionary<int, CubeEntity> cubeEntities;
+    public int packetNumber;
 
-    public Snapshot(Dictionary<int, CubeEntity> cubeEntities)
+    public Snapshot(Dictionary<int, CubeEntity> cubeEntities, int packetNumber)
     {
         this.cubeEntities = cubeEntities;
+        this.packetNumber = packetNumber;
     }
     
     public void Serialize(BitBuffer buffer)
     {
+        buffer.PutInt(packetNumber);
         foreach (var kv in cubeEntities)
         {
             kv.Value.Serialize(buffer);
@@ -23,6 +26,7 @@ public class Snapshot
     
     public void Deserialize(BitBuffer buffer)
     {
+        packetNumber = buffer.GetInt();
         foreach (var kv in cubeEntities)
         {
             if (buffer.HasRemaining())  // In case new players haven't been added to the client yet
@@ -39,7 +43,7 @@ public class Snapshot
         {
             cubeEntities[kv.Key] = CubeEntity.createInterpolated(previous.cubeEntities[kv.Key], next.cubeEntities[kv.Key], t);
         }
-        return new Snapshot(cubeEntities);
+        return new Snapshot(cubeEntities, -1);
     }
 
     public void Apply(int clientId)

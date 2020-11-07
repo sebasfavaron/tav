@@ -16,8 +16,10 @@ public class Utils
     };
 
     public static int serverPort = 8999;
-    
-    
+    public static float gravity = 5f;
+    public static float speed = 8f;
+
+
     // Start is called before the first frame update
     void Start()
     {

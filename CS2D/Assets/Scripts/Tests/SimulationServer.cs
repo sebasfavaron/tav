@@ -68,6 +68,8 @@ public class SimulationServer : MonoBehaviour
     private void ReceiveInputs(Packet packet)
     {
         int id = packet.buffer.GetInt();
+        float gravity = Utils.gravity;
+        float speed = Utils.speed;
         var cube = cubeEntitiesServer[Utils.GetPortFromId(id)];
         int max = 0, amountOfCommandsToProcess = packet.buffer.GetInt();
         for (int i = 0; i < amountOfCommandsToProcess; i++)
@@ -77,12 +79,14 @@ public class SimulationServer : MonoBehaviour
 
             if (command.inputNumber > maxInput)
             {
-                cube.cubeGameObject.GetComponent<CharacterController>().Move(command.moveVector * (10 * Time.fixedDeltaTime));
+                Vector3 move = cube.cubeGameObject.transform.forward * command.moveVector.z + 
+                               cube.cubeGameObject.transform.right * command.moveVector.x + command.moveVector + Vector3.down * gravity;
+                cube.cubeGameObject.GetComponent<CharacterController>().Move(move * (speed * Time.fixedDeltaTime));
                 
                 max = Mathf.Max(command.inputNumber, max);
             }
         }
-        cube.packetNumber = max;
+        // cube.packetNumber = max;
 
         // send ack
         SendAck(max, cube.port);
@@ -131,7 +135,7 @@ public class SimulationServer : MonoBehaviour
             // serialize
             var packet = Packet.Obtain();
             packet.buffer.PutInt((int) Utils.Ports.DATA);
-            var snapshot = new Snapshot(cubeEntitiesServer); // TODO: hacer esto custom por cada cliente (maxinput, packetnumber)
+            var snapshot = new Snapshot(cubeEntitiesServer, packetNumber); // TODO: hacer esto custom por cada cliente (maxinput, packetnumber)
             snapshot.Serialize(packet.buffer);
             packet.buffer.Flush();
             Utils.Send(packet, channel, cube.port);
