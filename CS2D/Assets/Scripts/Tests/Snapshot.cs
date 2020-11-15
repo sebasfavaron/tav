@@ -36,24 +36,25 @@ public class Snapshot
         }
     }
     
-    public static Snapshot CreateInterpolated(Snapshot previous, Snapshot next, float t)
+    public static Snapshot CreateInterpolated(Snapshot previous, Snapshot next, float t, int clientId)
     {
         Dictionary<int, CubeEntity> cubeEntities = new Dictionary<int, CubeEntity>();
         foreach (var kv in previous.cubeEntities)
         {
-            cubeEntities[kv.Key] = CubeEntity.createInterpolated(previous.cubeEntities[kv.Key], next.cubeEntities[kv.Key], t);
+            if (kv.Value.id != clientId) // Do not interpolate client
+            {
+                // Debug.Log(kv.Value.id);
+                cubeEntities[kv.Key] = CubeEntity.createInterpolated(previous.cubeEntities[kv.Key], next.cubeEntities[kv.Key], t);
+            }
         }
         return new Snapshot(cubeEntities, -1);
     }
 
-    public void Apply(int clientId)
+    public void Apply()
     {
         foreach (var cubeEntity in cubeEntities)
         {
-            if (cubeEntity.Value.id != clientId) // Do not interpolate client
-            {
-                cubeEntity.Value.Apply();
-            }
+            cubeEntity.Value.Apply();
         }
     }
 

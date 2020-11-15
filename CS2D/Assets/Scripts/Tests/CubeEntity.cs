@@ -5,6 +5,7 @@ using UnityEngine;
 public class CubeEntity
 {
 
+    public bool isBot;
     public int id;
     public Vector3 position;
     public Quaternion rotation;
@@ -14,12 +15,13 @@ public class CubeEntity
     public int port;
     public int maxInputReceived;
     
-    public CubeEntity(GameObject cubeGameObject, int id)
+    public CubeEntity(GameObject cubeGameObject, int id, bool isBot = false)
     {
         this.cubeGameObject = cubeGameObject;
         this.id = id;
         this.port = Utils.GetPortFromId(id);
         this.maxInputReceived = -1;
+        this.isBot = isBot;
     }
 
     public CubeEntity(Vector3 position, Quaternion rotation, GameObject cubeGameObject)
@@ -29,6 +31,7 @@ public class CubeEntity
         this.cubeGameObject = cubeGameObject;
         this.port = -1;
         this.maxInputReceived = -1;
+        this.isBot = false;
     }
     
     public CubeEntity(CubeEntity original)
@@ -72,6 +75,8 @@ public class CubeEntity
     {
         var cubeEntity = new CubeEntity(previous.cubeGameObject, previous.id);
         cubeEntity.position = cubeEntity.position + Vector3.Lerp(previous.position, next.position, t);
+        // Debug.Log($"{previous.rotation}, {next.rotation}, {t}");
+        next.rotation = new Quaternion(next.rotation.x + 0.01f, next.rotation.y + 0.01f, next.rotation.z + 0.01f, next.rotation.w + 0.01f);
         var deltaRot=  Quaternion.Lerp(previous.rotation, next.rotation, t);
         var rot = new Quaternion();
         rot.x = previous.rotation.x + deltaRot.x;

@@ -28,7 +28,7 @@ public class Utils
     
     public static void Send(Packet packet, Channel channel, int remotePort)
     {
-        string serverIP = "127.0.0.1";
+        string serverIP = GameManager.IPAddress;
         var remoteEp = new IPEndPoint(IPAddress.Parse(serverIP), remotePort);
         channel.Send(packet, remoteEp);
         packet.Free();

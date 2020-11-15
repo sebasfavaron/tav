@@ -5,5 +5,19 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/2DOnlineFree/Scene/Example.unity
+    path: Assets/Scene/StartMenu.unity
+    guid: 3c9667ba4cdba124c8c451150fb97f71
+  - enabled: 1
+    path: Assets/Scene/ServerScene.unity
+    guid: 153d63f9c5f394d769c71a9835133911
+  - enabled: 1
+    path: Assets/Scene/ClientScene.unity
+    guid: b2d4935015a456441be06a3039103cb4
+  - enabled: 1
+    path: Assets/Scene/ClientServerScene(debugging).unity
+    guid: aa52974cfceff0a4c9a3286f2458a7bc
+  m_configObjects: {}

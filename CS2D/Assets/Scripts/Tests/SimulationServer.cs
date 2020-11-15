@@ -17,7 +17,8 @@ public class SimulationServer : MonoBehaviour
     
     [SerializeField] private GameObject serverCubePrefab;
     private Dictionary<int, CubeEntity> cubeEntitiesServer;
-    private List<int> randomNumbersReceived;
+    private Dictionary<int, CubeEntity> bots;
+    private List<int> portsUsed;
     private CharacterController characterController;
     private Dictionary<int, int> sendPorts;
 
@@ -28,8 +29,10 @@ public class SimulationServer : MonoBehaviour
         channel = new Channel(Utils.serverPort);
 
         cubeEntitiesServer = new Dictionary<int, CubeEntity>();
-        randomNumbersReceived = new List<int>();
+        bots = new Dictionary<int, CubeEntity>();
+        portsUsed = new List<int>();
         characterController = GetComponent<CharacterController>();
+        InvokeRepeating(nameof(BotRandomMove), 1f, 0.2f);
     }
 
     private void FixedUpdate()
@@ -43,7 +46,7 @@ public class SimulationServer : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.B))
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 1; i++)
             {
                 BotJoin();
             }
@@ -68,9 +71,10 @@ public class SimulationServer : MonoBehaviour
     private void ReceiveInputs(Packet packet)
     {
         int id = packet.buffer.GetInt();
-        float gravity = Utils.gravity;
-        float speed = Utils.speed;
+        if (!cubeEntitiesServer.ContainsKey(Utils.GetPortFromId(id))) return;
+        
         var cube = cubeEntitiesServer[Utils.GetPortFromId(id)];
+        
         int max = 0, amountOfCommandsToProcess = packet.buffer.GetInt();
         for (int i = 0; i < amountOfCommandsToProcess; i++)
         {
@@ -80,8 +84,8 @@ public class SimulationServer : MonoBehaviour
             if (command.inputNumber > maxInput)
             {
                 Vector3 move = cube.cubeGameObject.transform.forward * command.moveVector.z + 
-                               cube.cubeGameObject.transform.right * command.moveVector.x + command.moveVector + Vector3.down * gravity;
-                cube.cubeGameObject.GetComponent<CharacterController>().Move(move * (speed * Time.fixedDeltaTime));
+                               cube.cubeGameObject.transform.right * command.moveVector.x + command.moveVector + Vector3.down * Utils.gravity;
+                cube.cubeGameObject.GetComponent<CharacterController>().Move(move * (Utils.speed * Time.fixedDeltaTime));
                 
                 max = Mathf.Max(command.inputNumber, max);
             }
@@ -89,7 +93,7 @@ public class SimulationServer : MonoBehaviour
         // cube.packetNumber = max;
 
         // send ack
-        SendAck(max, cube.port);
+        if (!cube.isBot) SendAck(max, cube.port);
     }
 
     private void SendAck(int max, int port)
@@ -104,14 +108,19 @@ public class SimulationServer : MonoBehaviour
         maxInput = Mathf.Max(max, maxInput);
     }
 
-    private void ReceiveJoins(Packet packet)
+    private void ReceiveJoins(Packet packet, bool isBot = false)
     {
         int id = packet.buffer.GetInt();
-        var existingPlayer = randomNumbersReceived.Contains(id);
+        int port = Utils.GetPortFromId(id);
+        var existingPlayer = portsUsed.Contains(port);
         if (!existingPlayer)
         {
-            PlayerJoined(id);
-            randomNumbersReceived.Add(id);    
+            PlayerJoined(id, isBot);
+            portsUsed.Add(port);
+        }
+        else
+        {
+            print("Existing id (or diff id that would receive the same port) trying to join. Ignoring");
         }
     }
     
@@ -131,6 +140,7 @@ public class SimulationServer : MonoBehaviour
         foreach (var kv in cubeEntitiesServer)
         {
             var cube = kv.Value;
+            if(cube.isBot) continue;
             
             // serialize
             var packet = Packet.Obtain();
@@ -142,7 +152,7 @@ public class SimulationServer : MonoBehaviour
         }
     }
     
-    private void PlayerJoined(int id)  // Server
+    private void PlayerJoined(int id, bool isBot = false)  // Server
     {
         // send player joined packet to everyone (including to the new player as a confirmation)
         Packet playerJoinedPacket = Packet.Obtain();
@@ -151,13 +161,19 @@ public class SimulationServer : MonoBehaviour
         playerJoinedPacket.buffer.Flush();
         
         // init new player
-        var serverCubeGO = Instantiate(serverCubePrefab, new Vector3(), Quaternion.identity);
+        var serverCubeGO = Instantiate(serverCubePrefab, new Vector3(0f, 3f, 0f), Quaternion.identity);
         var serverCube = new CubeEntity(serverCubeGO, id);
+        serverCubeGO.name = $"server-{id}";
         cubeEntitiesServer[serverCube.port] = serverCube;
+        if(isBot) {
+            serverCubeGO.name = $"server-bot-{id}";
+            bots[serverCube.port] = serverCube; // store bots in another list to test applying movement to them
+            print($"adding bot {serverCube.id}-{serverCube.port}");
+        }
         
         foreach (var cube in cubeEntitiesServer.Values) // send it to the new player and the rest
         {
-            Utils.Send(playerJoinedPacket, channel, cube.port);
+            if(!cube.isBot) Utils.Send(playerJoinedPacket, channel, cube.port);
         }
     }
 
@@ -165,13 +181,31 @@ public class SimulationServer : MonoBehaviour
     {
         var joinPacket = Packet.Obtain();
         var id = Random.Range(0, 1000000);
-
+        print(id);
+        
         // send id
-        joinPacket.buffer.PutInt((int) Utils.Ports.JOIN);
         joinPacket.buffer.PutInt(id);
         joinPacket.buffer.Flush();
-        ReceiveJoins(joinPacket);
+        ReceiveJoins(joinPacket, true);
         joinPacket.Free();
+    }
+
+    private void BotRandomMove()
+    {
+        foreach (var kv in bots)
+        {
+            var moveVector = new Vector3(100, 10, 10);
+            var command = new Commands(0, moveVector, 0);
+        
+            var packet = Packet.Obtain();
+            packet.buffer.PutInt((int) Utils.Ports.INPUT);
+            packet.buffer.PutInt(kv.Key);
+            packet.buffer.PutInt(1);
+            command.Serialize(packet.buffer);
+            packet.buffer.Flush();
+
+            ReceiveInputs(packet);
+        }
     }
     
     private void OnDestroy() {

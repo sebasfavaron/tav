@@ -161,8 +161,8 @@ public class SimulationClient : MonoBehaviour
     {
         while (interpolationBuffer.Count >= requiredSnapshots && !tempDisconnect)
         {
-            Interpolate();
-            Reconciliate();    
+            Interpolate(); // for other players
+            Reconciliate(); // for client
         }
     }
     
@@ -171,8 +171,9 @@ public class SimulationClient : MonoBehaviour
         var previousTime = interpolationBuffer[0].packetNumber * (1f/pps);
         var nextTime =  interpolationBuffer[1].packetNumber * (1f/pps);
         var t =  (clientTime - previousTime) / (nextTime - previousTime);
-        var interpolatedSnapshot = Snapshot.CreateInterpolated(interpolationBuffer[0], interpolationBuffer[1], t);
-        interpolatedSnapshot.Apply(clientId);
+        if(t == 0) print("t is ZERO");
+        var interpolatedSnapshot = Snapshot.CreateInterpolated(interpolationBuffer[0], interpolationBuffer[1], t, clientId);
+        interpolatedSnapshot.Apply();
         
         if(clientTime > nextTime) {
             interpolationBuffer.RemoveAt(0);
@@ -181,51 +182,19 @@ public class SimulationClient : MonoBehaviour
 
     private void Reconciliate()
     {
-        var max = 0;
-        // Snapshot lastServerSnapshot = null;
-        // interpolationBuffer.ForEach(snapshot =>
-        // {
-        //     if (snapshot.inputNumber > max)
-        //     {
-        //         lastServerSnapshot = snapshot;
-        //     }
-        // });
         var clientInServer = interpolationBuffer[interpolationBuffer.Count - 1].cubeEntities[clientCube.port];
-        
-        // 1. Deactivate real client
-        // 2. Instantiate fake client
-        // 3. Simulate movements from 'commands' list (all commands not confirmed by server)
-        // 4. Check if the resulting position is the same as the real client's position (with a delta for error). If false, tp real client to fake client's position
 
-        // 1. Save client's position
-        // var clientCopy = new CubeEntity(clientCube);
-        
-        // 2. Tp client to client's position in server
-        // clientCubeRigidBody.position = clientInServer.position; // WARN: capaz tengo que hacer deep copy
-        // clientCubeRigidBody.rotation = clientInServer.rotation; // WARN: capaz tengo que hacer deep copy
+        // 1. Tp client to client's position in server
         reconciliateClientCube.cubeGameObject.transform.position = clientInServer.position;
         reconciliateClientCube.cubeGameObject.transform.rotation = clientInServer.rotation;
 
-        // 3. Simulate movements from 'commands' list (all commands not confirmed by server)
-        // var toRemove = new List<Commands>();
-        // reconciliateCommands.ForEach(command =>
-        // {
-        //     print($"c: {command.inputNumber}, s: {lastServerSnapshot.inputNumber}, apply: {command.inputNumber >= lastServerSnapshot.inputNumber}");
-        //     if (command.inputNumber >= lastServerSnapshot.inputNumber)
-        //     {
-        //         // print("Applying");
-        //         // TODO: investigar desfazaje entre inputNumber del snapshot y reconciliateCommands (podria ser la razon por la que salta tanto para atras el cliente y no vuelve al "presente")
-        //         Apply(command);
-        //         toRemove.Add(command);
-        //     }
-        // });
-        // toRemove.ForEach(c => reconciliateCommands.Remove(c));
+        // 2. Simulate movements from 'commands' list (all commands not confirmed by server)
         foreach (var command in commands)
         {
             Apply(command, reconciliateClientCube, reconciliateCharacterController);
         }
 
-        // 4. Apply reconciliate position and rotation to client
+        // 3. Apply reconciliate position and rotation to client (todo: maybe only do it if difference between clientCube and reconClientCube is greater than THRESHOLD)
         clientCube.cubeGameObject.transform.position = reconciliateClientCube.cubeGameObject.transform.position;
         clientCube.cubeGameObject.transform.rotation = reconciliateClientCube.cubeGameObject.transform.rotation;
     }
@@ -271,11 +240,9 @@ public class SimulationClient : MonoBehaviour
             return;
         }
         
-        float gravity = Utils.gravity;
-        float speed = Utils.speed;
         Vector3 move = client.cubeGameObject.transform.forward * command.moveVector.z + 
-                       client.cubeGameObject.transform.right * command.moveVector.x + command.moveVector + Vector3.down * gravity;
-        characterController.Move(move * (speed * Time.fixedDeltaTime));
+                       client.cubeGameObject.transform.right * command.moveVector.x + command.moveVector + Vector3.down * Utils.gravity;
+        characterController.Move(move * (Utils.speed * Time.fixedDeltaTime));
     }
     
     private void SendInputs()
@@ -288,8 +255,6 @@ public class SimulationClient : MonoBehaviour
             packet.buffer.PutInt(commands.Count);
             foreach (var command in commands)
             {
-                // print("----------------");
-                // print(command.inputNumber);
                 command.Serialize(packet.buffer);
             }
             packet.buffer.Flush();
@@ -302,12 +267,11 @@ public class SimulationClient : MonoBehaviour
     {
         var joinPacket = Packet.Obtain();
 
-        // send random number to validate future PlayerJoined packet
+        // send random number as id
         joinPacket.buffer.PutInt((int) Utils.Ports.JOIN);
         joinPacket.buffer.PutInt(clientId);
         joinPacket.buffer.Flush();
         Utils.Send(joinPacket, channel, serverPort);
-        // joinPacket.Free();
     }
 
     private void PlayerJoined(Packet packet)
@@ -315,18 +279,21 @@ public class SimulationClient : MonoBehaviour
         // wait for confirmation
         var receivedId = packet.buffer.GetInt();
 
-        var cubeGO = Instantiate(clientCubePrefab, new Vector3(), Quaternion.identity);
+        var cubeGO = Instantiate(clientCubePrefab, new Vector3(0f, 3f, 0f), Quaternion.identity);
+        cubeGO.name = $"player-{receivedId}";
         var cube = new CubeEntity(cubeGO, receivedId);
         cubeEntitiesClient[cube.port] = cube;
 
         // if player joined is this client
         if (!connected && receivedId == clientId)
         {
+            cubeGO.name = $"client-{receivedId}";
             clientCube = cube;
             clientCharacterController = clientCube.cubeGameObject.GetComponent<CharacterController>();
             
-            var conciliateGO = Instantiate(clientReconciliateCubePrefab, new Vector3(), Quaternion.identity);
-            reconciliateClientCube = new CubeEntity(conciliateGO, clientId);
+            var reconciliateGO = Instantiate(clientReconciliateCubePrefab, new Vector3(0f, 3f, 0f), Quaternion.identity);
+            reconciliateGO.name = $"reconciliate-{receivedId}";
+            reconciliateClientCube = new CubeEntity(reconciliateGO, clientId);
             reconciliateCharacterController = reconciliateClientCube.cubeGameObject.GetComponent<CharacterController>();
             // conciliateCharacterController.transform.GetChild(1).gameObject.active = false;
             // conciliateCharacterController.transform.GetChild(0).gameObject.active = false;
