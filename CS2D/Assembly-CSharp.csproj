@@ -644,6 +644,16 @@
  <HintPath>C:/Program Files/Unity/Hub/Editor/2019.2.12f1/Editor/Data/NetStandard/compat/2.0.0/shims/netfx/System.Xml.Serialization.dll</HintPath>
  </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="IngameDebugConsole.Runtime.csproj">
+      <Project>{DBE77F17-8A5C-9B71-40A8-1BB04FE7EDB7}</Project>
+      <Name>IngameDebugConsole.Runtime</Name>
+    </ProjectReference>
+    <ProjectReference Include="IngameDebugConsole.Editor.csproj">
+      <Project>{F6EF9BF0-E849-68CF-D09B-DA92B409D910}</Project>
+      <Name>IngameDebugConsole.Editor</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

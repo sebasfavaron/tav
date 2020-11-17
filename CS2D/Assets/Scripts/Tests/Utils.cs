@@ -16,8 +16,9 @@ public class Utils
     };
 
     public static int serverPort = 8999;
-    public static float gravity = 5f;
+    public static float gravity = 1f;
     public static float speed = 8f;
+    public static Vector3 startPos = new Vector3(0f, 6f, 0f);
 
 
     // Start is called before the first frame update

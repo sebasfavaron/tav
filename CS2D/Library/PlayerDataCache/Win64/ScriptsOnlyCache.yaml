@@ -5,21 +5,36 @@ ScriptsOnlyBuild:
     - LoadScenes
     - SimulationClient
     - SimulationServer
+    IngameDebugConsole.Runtime.dll:
+    - IngameDebugConsole.DebugLogItem
+    - IngameDebugConsole.DebugLogManager
+    - IngameDebugConsole.DebugLogPopup
+    - IngameDebugConsole.DebugLogRecycledListView
+    - IngameDebugConsole.DebugLogResizeListener
+    - IngameDebugConsole.DebugsOnScrollListener
     Unity.Rider.Editor.dll:
     - Packages.Rider.Editor.RiderScriptEditorData
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
     - UnityEditor.TestTools.TestRunner.TestListCacheData
     UnityEngine.UI.dll:
+    - UnityEngine.EventSystems.BaseInput
     - UnityEngine.EventSystems.EventSystem
+    - UnityEngine.EventSystems.EventTrigger
     - UnityEngine.EventSystems.StandaloneInputModule
     - UnityEngine.UI.Button
     - UnityEngine.UI.CanvasScaler
     - UnityEngine.UI.GraphicRaycaster
+    - UnityEngine.UI.HorizontalLayoutGroup
     - UnityEngine.UI.Image
     - UnityEngine.UI.InputField
+    - UnityEngine.UI.LayoutElement
+    - UnityEngine.UI.RectMask2D
+    - UnityEngine.UI.ScrollRect
+    - UnityEngine.UI.Scrollbar
     - UnityEngine.UI.Slider
     - UnityEngine.UI.Text
+    - UnityEngine.UI.VerticalLayoutGroup
   sceneClasses:
     Assets/Scene/ClientScene.unity:
     - Class: 1
@@ -51,7 +66,7 @@ ScriptsOnlyBuild:
     - Class: 108
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 10492}
+      Script: {instanceID: 10496}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 143
@@ -88,9 +103,9 @@ ScriptsOnlyBuild:
     - Class: 108
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 10492}
+      Script: {instanceID: 10496}
     - Class: 114
-      Script: {instanceID: 11168}
+      Script: {instanceID: 11172}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 143
@@ -127,7 +142,7 @@ ScriptsOnlyBuild:
     - Class: 108
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 11168}
+      Script: {instanceID: 11172}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 143
@@ -166,39 +181,67 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9828}
     - Class: 114
+      Script: {instanceID: 9830}
+    - Class: 114
       Script: {instanceID: 9868}
+    - Class: 114
+      Script: {instanceID: 9984}
+    - Class: 114
+      Script: {instanceID: 10060}
     - Class: 114
       Script: {instanceID: 10250}
     - Class: 114
-      Script: {instanceID: 10602}
+      Script: {instanceID: 10312}
     - Class: 114
-      Script: {instanceID: 10792}
+      Script: {instanceID: 10362}
     - Class: 114
-      Script: {instanceID: 11056}
+      Script: {instanceID: 10426}
     - Class: 114
-      Script: {instanceID: 11414}
+      Script: {instanceID: 10606}
     - Class: 114
-      Script: {instanceID: 11448}
+      Script: {instanceID: 10690}
     - Class: 114
-      Script: {instanceID: 14742}
+      Script: {instanceID: 10796}
     - Class: 114
-      Script: {instanceID: 15282}
+      Script: {instanceID: 10820}
     - Class: 114
-      Script: {instanceID: 17758}
+      Script: {instanceID: 11060}
     - Class: 114
-      Script: {instanceID: 17762}
+      Script: {instanceID: 11356}
     - Class: 114
-      Script: {instanceID: 17778}
+      Script: {instanceID: 11386}
     - Class: 114
-      Script: {instanceID: 17784}
+      Script: {instanceID: 11418}
     - Class: 114
-      Script: {instanceID: 17788}
+      Script: {instanceID: 11452}
     - Class: 114
-      Script: {instanceID: 17792}
+      Script: {instanceID: 14230}
     - Class: 114
-      Script: {instanceID: 17808}
+      Script: {instanceID: 14234}
     - Class: 114
-      Script: {instanceID: 17950}
+      Script: {instanceID: 14250}
+    - Class: 114
+      Script: {instanceID: 14256}
+    - Class: 114
+      Script: {instanceID: 14260}
+    - Class: 114
+      Script: {instanceID: 14264}
+    - Class: 114
+      Script: {instanceID: 14280}
+    - Class: 114
+      Script: {instanceID: 14422}
+    - Class: 114
+      Script: {instanceID: 17114}
+    - Class: 114
+      Script: {instanceID: 17116}
+    - Class: 114
+      Script: {instanceID: 17118}
+    - Class: 114
+      Script: {instanceID: 17120}
+    - Class: 114
+      Script: {instanceID: 17122}
+    - Class: 114
+      Script: {instanceID: 17128}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -214,6 +257,8 @@ ScriptsOnlyBuild:
     - Class: 223
       Script: {instanceID: 0}
     - Class: 224
+      Script: {instanceID: 0}
+    - Class: 225
       Script: {instanceID: 0}
   scriptHashData:
   - hash:
@@ -438,6 +483,18 @@ ScriptsOnlyBuild:
     assemblyName: UnityEngine.UI.dll
     namespaceName: UnityEngine.UI
     className: Selectable
+  - hash:
+      serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: GameManager
+  - hash:
+      serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: LoadScenes
   - hash:
       serializedVersion: 2
       Hash: b3ab2106268377ffe25dd18ac23dca28
@@ -704,16 +761,40 @@ ScriptsOnlyBuild:
     className: PlayableTrack
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: LoadScenes
+      Hash: 5d72f7002966b891d5cb66f953848ebe
+    assemblyName: IngameDebugConsole.Runtime.dll
+    namespaceName: IngameDebugConsole
+    className: DebugLogRecycledListView
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: GameManager
+      Hash: 45763c5633962fe4e7ad13b675515e66
+    assemblyName: IngameDebugConsole.Runtime.dll
+    namespaceName: IngameDebugConsole
+    className: DebugLogResizeListener
+  - hash:
+      serializedVersion: 2
+      Hash: 150d2705ec079b79d52ccce665aab8e1
+    assemblyName: IngameDebugConsole.Runtime.dll
+    namespaceName: IngameDebugConsole
+    className: DebugLogPopup
+  - hash:
+      serializedVersion: 2
+      Hash: a8745838a673fe0d5cf956969774a16b
+    assemblyName: IngameDebugConsole.Runtime.dll
+    namespaceName: IngameDebugConsole
+    className: DebugLogItem
+  - hash:
+      serializedVersion: 2
+      Hash: 9b070fd11003a7ac517c876788f0fb2a
+    assemblyName: IngameDebugConsole.Runtime.dll
+    namespaceName: IngameDebugConsole
+    className: DebugsOnScrollListener
+  - hash:
+      serializedVersion: 2
+      Hash: 67d4f995a0933fb5bce946e3f857ac66
+    assemblyName: IngameDebugConsole.Runtime.dll
+    namespaceName: IngameDebugConsole
+    className: DebugLogManager
   platform: 19
   scenePathNames:
   - Assets/Scene/StartMenu.unity
