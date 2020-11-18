@@ -110,7 +110,8 @@ public class SimulationClient : MonoBehaviour
 
         // I check with client's packetNumber but they are all the same
         bool cond = (bufferSize == 0 || newPacketNumber > lastBufferPacketNumber) && bufferSize < requiredSnapshots + 1;
-        if(cond) {
+        if(cond)
+        {
             interpolationBuffer.Add(snapshot);
         }
     }
@@ -119,8 +120,8 @@ public class SimulationClient : MonoBehaviour
     {
         while (interpolationBuffer.Count >= requiredSnapshots && !tempDisconnect)
         {
-            Interpolate(); // for other players
             Reconciliate(); // for client // TODO: capaz lo puedo poner en su propio while loop
+            Interpolate(); // for other players
         }
     }
     
@@ -129,9 +130,9 @@ public class SimulationClient : MonoBehaviour
         var previousTime = interpolationBuffer[0].packetNumber * (1f/pps);
         var nextTime =  interpolationBuffer[1].packetNumber * (1f/pps);
         var t =  (clientTime - previousTime) / (nextTime - previousTime);
-        if(t == 0) print("t is ZERO");
         var interpolatedSnapshot = Snapshot.CreateInterpolated(interpolationBuffer[0], interpolationBuffer[1], t, clientId);
-        interpolatedSnapshot.Apply();
+        // interpolatedSnapshot.cubeEntities.Remove(clientCube.port);
+        interpolatedSnapshot.Apply(clientId);
         
         if(clientTime > nextTime) {
             interpolationBuffer.RemoveAt(0);
@@ -179,8 +180,10 @@ public class SimulationClient : MonoBehaviour
     private Commands ReadStoreInput()
     {
         var timeout = Time.time + 2f;
-        var moveVector = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        var command = new Commands(inputNumber, moveVector, timeout);
+        var rotate = Input.GetAxis("Horizontal");
+        var forwards = Input.GetAxis("Vertical");
+        var shoot = Input.GetKey(KeyCode.Space);
+        var command = new Commands(inputNumber, forwards, rotate, shoot, timeout);
         
         commands.Add(command);
         reconciliateCommands.Add(command);
@@ -189,15 +192,21 @@ public class SimulationClient : MonoBehaviour
         return command;
     }
 
-    private void Apply(Commands command, CubeEntity client, CharacterController characterController){
-        if(client == null || characterController == null)
+    private void Apply(Commands command, CubeEntity cube, CharacterController characterController){
+        if(cube == null || characterController == null)
         {
             return;
         }
-        
-        Vector3 move = client.cubeGameObject.transform.forward * command.moveVector.z + 
-                       client.cubeGameObject.transform.right * command.moveVector.x + command.moveVector + Vector3.down * Utils.gravity;
-        characterController.Move(move * (Utils.speed * Time.fixedDeltaTime));
+
+        var _transform = cube.cubeGameObject.transform;
+        Vector3 move = _transform.forward * command.forwards + Vector3.down * Utils.gravity;
+        characterController.Move(move * (Utils.speed * Time.deltaTime));
+        transform.Rotate(new Vector3(0f, command.rotate * (Utils.rotateSpeed * Time.deltaTime), 0f));
+
+        if (command.shoot)
+        {
+            // TODO: shoot mechanic with physics.raycast
+        }
     }
     
     private void SendInputs()
@@ -233,53 +242,60 @@ public class SimulationClient : MonoBehaviour
     {
         var receivedId = packet.buffer.GetInt();
 
-        var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
-        print($"client-{receivedId} joined");
+        print($"player-{receivedId} joined");
         
-        cubeGO.name = $"player-{receivedId}";
-        cubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
-        var cube = new CubeEntity(cubeGO, receivedId);
-        cubeEntitiesClient[cube.port] = cube;
-
         // Check if player joined is this client (server confirmation that I'm joined)
         if (!connected && receivedId == clientId)
         {
+            // Add myself
             print($"and its me!");
+            var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
+            cubeGO.name = $"client-{clientId}";
+            var cube = new CubeEntity(cubeGO, receivedId);
+            clientCharacterController = cubeGO.GetComponent<CharacterController>();
+            clientCube = cube;
+            cubeEntitiesClient[cube.port] = cube;
+            GameManager.clientId = clientId;
+
+            var reconciliateGO = Instantiate(clientReconciliateCubePrefab, Utils.startPos, Quaternion.identity);
+            reconciliateGO.name = $"reconciliate-{clientId}";
+            reconciliateClientCube = new CubeEntity(reconciliateGO, clientId);
+            reconciliateCharacterController = reconciliateGO.GetComponent<CharacterController>();
+            // reconciliateCharacterController.transform.GetChild(1).gameObject.active = false;
+            // reconciliateCharacterController.transform.GetChild(0).gameObject.active = false;
             
-            // Add all previously connected players
+            
+            // Now add all previously connected players
             int previousCubesAmount = packet.buffer.GetInt();
-            print($"client-{receivedId} receiving join with {previousCubesAmount} friends");
+            print($"client-{clientId} receiving join with {previousCubesAmount} friends");
             for (int i = 0; i < previousCubesAmount; i++)
             {
                 int newCubeId = packet.buffer.GetInt();
                 print($"1 friend with id {newCubeId}");
                 if (!cubeEntitiesClient.ContainsKey(Utils.GetPortFromId(newCubeId)))
                 {
-                    print("adding him");
-                    var newCubeGO = Instantiate(clientCubePrefab, new Vector3(0f, 3f, 0f), Quaternion.identity);
+                    var newCubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
 
-                    newCubeGO.name = $"player-{receivedId}";
-                    // newCubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
+                    newCubeGO.name = $"player-{newCubeId}";
+                    print($"adding {newCubeGO.name}");
+                    newCubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
 
                     var newCube = new CubeEntity(newCubeGO, newCubeId);
                     newCube.Deserialize(packet.buffer);
                     cubeEntitiesClient[newCube.port] = newCube;
                 }
             }
-            
-            cubeGO.name = $"client-{receivedId}";
-            clientCube = cube;
-            clientCharacterController = clientCube.cubeGameObject.GetComponent<CharacterController>();
-            
-            var reconciliateGO = Instantiate(clientReconciliateCubePrefab, new Vector3(0f, 3f, 0f), Quaternion.identity);
-            reconciliateGO.name = $"reconciliate-{receivedId}";
-            reconciliateGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
-            reconciliateClientCube = new CubeEntity(reconciliateGO, clientId);
-            reconciliateCharacterController = reconciliateClientCube.cubeGameObject.GetComponent<CharacterController>();
-            // reconciliateCharacterController.transform.GetChild(1).gameObject.active = false;
-            // reconciliateCharacterController.transform.GetChild(0).gameObject.active = false;
-            
+
             connected = true;
+        }
+        else
+        {
+            // If new player is not the client
+            var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
+            cubeGO.name = $"player-{receivedId}";
+            cubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
+            var cube = new CubeEntity(cubeGO, receivedId);
+            cubeEntitiesClient[cube.port] = cube;
         }
     }
     

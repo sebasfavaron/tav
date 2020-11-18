@@ -19,6 +19,7 @@ public class Utils
     public static float gravity = 1f;
     public static float speed = 8f;
     public static Vector3 startPos = new Vector3(0f, 6f, 0f);
+    public static float rotateSpeed = 400f;
 
 
     // Start is called before the first frame update

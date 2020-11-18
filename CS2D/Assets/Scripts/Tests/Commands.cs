@@ -4,19 +4,25 @@ public class Commands
 {
 
     public int inputNumber;
-    public Vector3 moveVector;
+    public float forwards;
+    public float rotate;
     public float timestamp;
+    public bool shoot;
 
-    public Commands(int inputNumber, Vector3 moveVector)
+    public Commands(int inputNumber, float forwards, float rotate, bool shoot)
     {
         this.inputNumber = inputNumber;
-        this.moveVector = moveVector;
+        this.forwards = forwards;
+        this.rotate = rotate;
+        this.shoot = shoot;
     }
     
-    public Commands(int inputNumber, Vector3 moveVector, float timestamp)
+    public Commands(int inputNumber, float forwards, float rotate, bool shoot, float timestamp)
     {
         this.inputNumber = inputNumber;
-        this.moveVector = moveVector;
+        this.forwards = forwards;
+        this.rotate = rotate;
+        this.shoot = shoot;
         this.timestamp = timestamp;
     }
 
@@ -25,14 +31,16 @@ public class Commands
     public void Serialize(BitBuffer buffer)
     {
         buffer.PutInt(inputNumber);
-        buffer.PutFloat(moveVector.x);
-        buffer.PutFloat(moveVector.y);
-        buffer.PutFloat(moveVector.z);
+        buffer.PutFloat(forwards);
+        buffer.PutFloat(rotate);
+        buffer.PutBit(shoot);
     }
     
     public void Deserialize(BitBuffer buffer)
     {
         inputNumber = buffer.GetInt();
-        moveVector = new Vector3(buffer.GetFloat(), buffer.GetFloat(), buffer.GetFloat());
+        forwards = buffer.GetFloat();
+        rotate = buffer.GetFloat();
+        shoot = buffer.GetBit();
     }
 }

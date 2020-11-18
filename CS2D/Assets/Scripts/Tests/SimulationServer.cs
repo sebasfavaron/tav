@@ -88,9 +88,10 @@ public class SimulationServer : MonoBehaviour
 
             if (command.inputNumber > maxInputs[port])
             {
-                Vector3 move = cube.cubeGameObject.transform.forward * command.moveVector.z + 
-                               cube.cubeGameObject.transform.right * command.moveVector.x + command.moveVector + Vector3.down * Utils.gravity;
-                cube.cubeGameObject.GetComponent<CharacterController>().Move(move * (Utils.speed * Time.fixedDeltaTime));
+                var cubeGO = cube.cubeGameObject;
+                Vector3 move = cubeGO.transform.forward * command.forwards + Vector3.down * Utils.gravity;
+                cubeGO.GetComponent<CharacterController>().Move(move * (Utils.speed * Time.deltaTime));
+                cubeGO.transform.Rotate(new Vector3(0f, command.rotate * (Utils.rotateSpeed * Time.deltaTime), 0f));
                 
                 max = Mathf.Max(command.inputNumber, max);
             }
@@ -106,8 +107,6 @@ public class SimulationServer : MonoBehaviour
         var packet3 = Packet.Obtain();
         packet3.buffer.PutInt((int) Utils.Ports.ACK);
         packet3.buffer.PutInt(max);
-        // var sendCube = new CubeEntity(Vector3.zero, Quaternion.identity, serverCubePrefab);
-        // sendCube.Serialize(packet3.buffer);
         packet3.buffer.Flush();
         Utils.Send(packet3, channel, port);
         maxInputs[port] = Mathf.Max(max, maxInputs[port]);
@@ -157,24 +156,24 @@ public class SimulationServer : MonoBehaviour
     private void PlayerJoined(int id, bool isBot = false)  // Server
     {
         // init new player
-        var serverCubeGO = Instantiate(serverCubePrefab, Utils.startPos, Quaternion.identity);
-        var serverCube = new CubeEntity(serverCubeGO, id, isBot);
-        serverCubeGO.name = $"server-{id}";
-        serverCubeGO.transform.SetParent(GameObject.Find("Players(Server)").transform);
-        cubeEntitiesServer[serverCube.port] = serverCube;
+        var cubeGO = Instantiate(serverCubePrefab, Utils.startPos, Quaternion.identity);
+        var newCube = new CubeEntity(cubeGO, id, isBot);
+        cubeGO.name = $"server-{id}";
+        cubeGO.transform.SetParent(GameObject.Find("Players(Server)").transform);
+        cubeEntitiesServer[newCube.port] = newCube;
         if(isBot) {
-            serverCubeGO.name = $"server-bot-{id}";
-            bots[serverCube.port] = serverCube; // store bots in another list to test applying movement to them
+            cubeGO.name = $"server-bot-{id}";
+            bots[newCube.port] = newCube; // store bots in another list to test applying movement to them
         }
         else
         {
-            packetNumbers[serverCube.port] = 0;
-            maxInputs[serverCube.port] = 0;
+            packetNumbers[newCube.port] = 0;
+            maxInputs[newCube.port] = 0;
         }
 
         if (oneClientConnected)
         {
-            keysOfCubesToDebug.Add(serverCube.port);
+            keysOfCubesToDebug.Add(newCube.port);
         }
         oneClientConnected = true;
         
@@ -183,27 +182,6 @@ public class SimulationServer : MonoBehaviour
             // send player joined packet to everyone (including to the new player as a confirmation)
             Packet playerJoinedPacket = Packet.Obtain();
             var buffer = playerJoinedPacket.buffer;
-            // buffer.PutInt((int) Utils.Ports.PLAYER_JOINED);
-            // buffer.PutInt(id);
-            // buffer.PutInt(cubeEntitiesServer.Count);
-            // foreach (var sendCube in cubeEntitiesServer.Values)
-            // {
-            //     buffer.PutInt(sendCube.id);
-            //     sendCube.Serialize(buffer);
-            // }
-            // buffer.Flush();
-            //
-            // var receivedId = playerJoinedPacket.buffer.GetInt();
-            // int previousCubesAmount = packet.buffer.GetInt();
-            // for (int i = 0; i < previousCubesAmount; i++)
-            // {
-            //     print($"cube {i} id: {packet.buffer.GetInt()}");
-            //     cubeEntitiesClient[newCube.port] = newCube;
-            // }
-            //
-            //
-            // playerJoinedPacket = Packet.Obtain();
-            // buffer = playerJoinedPacket.buffer;
             buffer.PutInt((int) Utils.Ports.PLAYER_JOINED);
             buffer.PutInt(id);
             buffer.PutInt(cubeEntitiesServer.Count);
@@ -236,8 +214,7 @@ public class SimulationServer : MonoBehaviour
     {
         foreach (var kv in bots)
         {
-            var moveVector = new Vector3(100, 10, 10);
-            var command = new Commands(0, moveVector, 0);
+            var command = new Commands(0, 1, 0.2f, false);
         
             var packet = Packet.Obtain();
             packet.buffer.PutInt((int) Utils.Ports.INPUT);

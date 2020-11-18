@@ -43,18 +43,25 @@ public class Snapshot
         {
             if (kv.Value.id != clientId) // Do not interpolate client
             {
-                // Debug.Log(kv.Value.id);
-                cubeEntities[kv.Key] = CubeEntity.createInterpolated(previous.cubeEntities[kv.Key], next.cubeEntities[kv.Key], t);
+                Debug.Log(kv.Value.id);
+                cubeEntities[kv.Key] = CubeEntity.createInterpolated(kv.Value, next.cubeEntities[kv.Key], t);
+            }
+            else
+            {
+                Debug.Log($"dont interpolate me, im client");
             }
         }
         return new Snapshot(cubeEntities, -1);
     }
 
-    public void Apply()
+    public void Apply(int clientId)
     {
         foreach (var cubeEntity in cubeEntities)
         {
-            cubeEntity.Value.Apply();
+            if (cubeEntity.Value.id != clientId) // Do not interpolate client
+            {
+                cubeEntity.Value.Apply();
+            }
         }
     }
 

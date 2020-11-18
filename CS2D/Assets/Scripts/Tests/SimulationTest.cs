@@ -21,6 +21,14 @@ public class SimulationTest : MonoBehaviour
     
         + ver de agregar un mensaje inicial con todos los jugadores que ya se conectaron
         tambien, si el random que manda el client ya lo mando otro client no se va a poder conectar. Habria que generar otro hasta que conecte o hacer algo
+        
+        TODO: el bot queda en el aire, parece que nadie lo actualiza
+        
+        TODO: puedo mover al client, pero cuando miro la scene el client es un player y el primer player que se une al server es mi objeto client-{clientId} y reconciliate-{clientId}.
+        todo Capaz reconciliate esta unido al equivocado
+        
+        TODO te swappea con el primer player(le pone el nombre client-{clientId})! por eso la camara lo sigue a el y no a vos. Vos controlas al otro (originalmente vos) porque tenes una referencia al cubeEntity
+        todo soy el 2do y me considera un player (no client) porque me interpola y no me sigue la camara, pero si me toma los inputs
     */
     
 }
