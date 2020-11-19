@@ -47,8 +47,8 @@ public class CubeEntity
 
     public void Serialize(BitBuffer buffer)
     {
-        position = cubeGameObject.transform.position;
-        rotation = cubeGameObject.transform.rotation;
+        var position = cubeGameObject.transform.position;
+        var rotation = cubeGameObject.transform.rotation;
         buffer.PutInt(maxInputReceived);
         buffer.PutFloat(position.x);
         buffer.PutFloat(position.y);
@@ -76,14 +76,15 @@ public class CubeEntity
     {
         var cubeEntity = new CubeEntity(previous.cubeGameObject, previous.id);
         cubeEntity.position = cubeEntity.position + Vector3.Lerp(previous.position, next.position, t);
-        // Debug.Log($"{previous.rotation}, {next.rotation}, {t}");
-        next.rotation = new Quaternion(next.rotation.x + 0.01f, next.rotation.y + 0.01f, next.rotation.z + 0.01f, next.rotation.w + 0.01f);
-        var deltaRot=  Quaternion.Lerp(previous.rotation, next.rotation, t);
-        var rot = new Quaternion();
-        rot.x = previous.rotation.x + deltaRot.x;
-        rot.w = previous.rotation.w + deltaRot.w;
-        rot.y = previous.rotation.y + deltaRot.y;
-        rot.z = previous.rotation.z + deltaRot.z;
+        next.rotation = new Quaternion(next.rotation.x + 0.001f, next.rotation.y + 0.001f, next.rotation.z + 0.001f, next.rotation.w + 0.001f);
+        var deltaRot= Quaternion.Lerp(previous.rotation, next.rotation, t);
+        var rot = new Quaternion
+        {
+            x = previous.rotation.x + deltaRot.x,
+            w = previous.rotation.w + deltaRot.w,
+            y = previous.rotation.y + deltaRot.y,
+            z = previous.rotation.z + deltaRot.z
+        };
         cubeEntity.rotation = rot;
         cubeEntity.maxInputReceived = Mathf.Max(previous.maxInputReceived, next.maxInputReceived);
         return cubeEntity;

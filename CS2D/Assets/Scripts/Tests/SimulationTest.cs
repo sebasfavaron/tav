@@ -29,6 +29,12 @@ public class SimulationTest : MonoBehaviour
         
         TODO te swappea con el primer player(le pone el nombre client-{clientId})! por eso la camara lo sigue a el y no a vos. Vos controlas al otro (originalmente vos) porque tenes una referencia al cubeEntity
         todo soy el 2do y me considera un player (no client) porque me interpola y no me sigue la camara, pero si me toma los inputs
+        
+        todo sin reconciliate, solo interpolacion: interpola el ultimo player con los movimientos del client (pos y rot). El client solo se mueve (pos).
+        todo que deberia pasar? que el ultimo player no se mueva (porque no es su input) y el client tampoco (porque no debe interpolar)
+        todo que sea el ultimo player y no el 1ro debe tener que ver con que no habia ningun player conectado esta vez (las anteriores estaba el 1ro y otros conectados)
+        
+        todo mañana hacer step into a ver si spawnea en 0,3,0 y al toque se tpea al 1er player
     */
     
 }

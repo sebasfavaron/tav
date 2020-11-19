@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 public class Snapshot
 {
@@ -39,18 +40,22 @@ public class Snapshot
     public static Snapshot CreateInterpolated(Snapshot previous, Snapshot next, float t, int clientId)
     {
         Dictionary<int, CubeEntity> cubeEntities = new Dictionary<int, CubeEntity>();
+        int cnt = 0;
         foreach (var kv in previous.cubeEntities)
         {
             if (kv.Value.id != clientId) // Do not interpolate client
             {
-                Debug.Log(kv.Value.id);
+                // Debug.Log(kv.Value.id);
+                if(kv.Value.cubeGameObject.name.Contains("client")) Debug.Log("GOT YOU! createinterp");
                 cubeEntities[kv.Key] = CubeEntity.createInterpolated(kv.Value, next.cubeEntities[kv.Key], t);
             }
             else
             {
-                Debug.Log($"dont interpolate me, im client");
+                cnt++;
+                // Debug.Log($"dont interpolate me, im client");
             }
         }
+        // Debug.Log(cnt);
         return new Snapshot(cubeEntities, -1);
     }
 
@@ -60,6 +65,7 @@ public class Snapshot
         {
             if (cubeEntity.Value.id != clientId) // Do not interpolate client
             {
+                if(cubeEntity.Value.cubeGameObject.name.Contains("client")) Debug.Log("GOT YOU! apply");
                 cubeEntity.Value.Apply();
             }
         }

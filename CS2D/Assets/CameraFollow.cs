@@ -15,20 +15,31 @@ public class CameraFollow : MonoBehaviour
             if(clientId == -1) return;
             
             var client = GameObject.Find($"client-{clientId}");
-            print(client);
             if (client != null)
             {
                 target = client.transform;
             }
+            else
+            {
+                client = GameObject.Find($"player-{clientId}");
+                if (client != null)
+                {
+                    target = client.transform;
+                }    
+            }
         }
         else
         {
-            var desiredPos = target.position + offset;
-            Vector3 velocity = Vector3.zero;
-            var smoothPos = Vector3.SmoothDamp(transform.position, desiredPos, ref velocity, smoothSpeed);
-            transform.position = smoothPos;
+            transform.position = target.position;
+            transform.rotation = target.rotation;
             
-            transform.LookAt(target);
+            transform.position += offset;
+            // var desiredPos = target.position + offset;
+            // Vector3 velocity = Vector3.zero;
+            // var smoothPos = Vector3.SmoothDamp(transform.position, desiredPos, ref velocity, smoothSpeed);
+            // transform.position = smoothPos;
+            
+            // transform.LookAt(target);
         }
     }
 }

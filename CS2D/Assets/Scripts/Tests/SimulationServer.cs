@@ -8,7 +8,6 @@ using Random = UnityEngine.Random;
 
 public class SimulationServer : MonoBehaviour
 {
-    private float accum = 0f;
     public int pps = 100;
     private bool oneClientConnected = false;
 
@@ -18,7 +17,6 @@ public class SimulationServer : MonoBehaviour
     private Dictionary<int, CubeEntity> cubeEntitiesServer;
     private Dictionary<int, CubeEntity> bots;
     private List<int> portsUsed;
-    private CharacterController characterController;
     private Dictionary<int, int> packetNumbers; // packetNumbers[cubePort] = cubePacketNumber
     private Dictionary<int, int> maxInputs; // maxInputs[cubePort] = cubeMaxInput
     private List<int> keysOfCubesToDebug;
@@ -32,7 +30,6 @@ public class SimulationServer : MonoBehaviour
         bots = new Dictionary<int, CubeEntity>();
         portsUsed = new List<int>();
         keysOfCubesToDebug = new List<int>();
-        characterController = GetComponent<CharacterController>();
         packetNumbers = new Dictionary<int, int>();
         maxInputs = new Dictionary<int, int>();
         InvokeRepeating(nameof(BotRandomMove), 1f, 0.2f);
@@ -77,7 +74,7 @@ public class SimulationServer : MonoBehaviour
         int port = Utils.GetPortFromId(id);
         if (!cubeEntitiesServer.ContainsKey(port)) return;
         
-        if(keysOfCubesToDebug.Contains(port)) print($"client-{id} sent inputs");
+        // if(keysOfCubesToDebug.Contains(port)) print($"client-{id} sent inputs");
         var cube = cubeEntitiesServer[port];
         
         int max = 0, amountOfCommandsToProcess = packet.buffer.GetInt();
@@ -89,14 +86,14 @@ public class SimulationServer : MonoBehaviour
             if (command.inputNumber > maxInputs[port])
             {
                 var cubeGO = cube.cubeGameObject;
-                Vector3 move = cubeGO.transform.forward * command.forwards + Vector3.down * Utils.gravity;
+                var _transform = cubeGO.transform;
+                Vector3 move = _transform.forward * command.forwards + Vector3.down * Utils.gravity;
                 cubeGO.GetComponent<CharacterController>().Move(move * (Utils.speed * Time.deltaTime));
-                cubeGO.transform.Rotate(new Vector3(0f, command.rotate * (Utils.rotateSpeed * Time.deltaTime), 0f));
+                _transform.Rotate(new Vector3(0f, command.rotate * (Utils.rotateSpeed * Time.deltaTime), 0f));
                 
                 max = Mathf.Max(command.inputNumber, max);
             }
         }
-        // cube.packetNumber = max;
 
         // send ack
         if (!cube.isBot) SendAck(max, cube.port);
@@ -121,7 +118,7 @@ public class SimulationServer : MonoBehaviour
         var existingPlayer = portsUsed.Contains(port);
         if (!existingPlayer)
         {
-            if(keysOfCubesToDebug.Contains(port)) print($"client-{id} sent join");
+            // if(keysOfCubesToDebug.Contains(port)) print($"client-{id} sent join");
             PlayerJoined(id, isBot);
             portsUsed.Add(port);
         }
@@ -184,10 +181,12 @@ public class SimulationServer : MonoBehaviour
             var buffer = playerJoinedPacket.buffer;
             buffer.PutInt((int) Utils.Ports.PLAYER_JOINED);
             buffer.PutInt(id);
-            buffer.PutInt(cubeEntitiesServer.Count);
-            print($"send to client-{cube.id} {cubeEntitiesServer.Count} friends");
+            buffer.PutInt(cubeEntitiesServer.Count-1);
+            print($"send to client-{cube.id} {cubeEntitiesServer.Count-1} friends");
             foreach (var sendCube in cubeEntitiesServer.Values)
             {
+                if(sendCube.port == cube.port) continue;  // dont send the player to himself
+                
                 print($"friend with id {sendCube.id}");
                 buffer.PutInt(sendCube.id);
                 sendCube.Serialize(buffer);

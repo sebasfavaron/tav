@@ -9,18 +9,13 @@ using Random = UnityEngine.Random;
 
 public class SimulationClient : MonoBehaviour
 {
-    private float accum = 0f;
     public int pps = 60;
-    private float accumReconciliate = 0;
-    private float joinCooldown = 0;
     public float rps = 1; // reconciliates per second
     private int inputNumber = 0;
     private float clientTime = 0f;
     public int requiredSnapshots = 3;
-    private bool clientPlaying = false;
     private bool connected = false;
     private bool tempDisconnect = false;
-    private readonly int serverPort = Utils.serverPort;
 
     private Channel channel;
 
@@ -49,6 +44,12 @@ public class SimulationClient : MonoBehaviour
     {
         ReadStoreApplySendInput(); // TODO: not using sendrate/pps?
         InterpolateAndReconciliate();
+        
+        // print($"clientid {clientId} == clientcubeid {clientCube.id} ~= clientcubeport {clientCube.port} ~= clientcubeGOname {clientCube.cubeGameObject.name}");
+        // foreach (var kv in cubeEntitiesClient)
+        // {
+        //     print($"player. valuePort {kv.Value.port} == keyPort {kv.Key} ~= valueId {kv.Value.id}");
+        // }
     }
 
     // Update is called once per frame
@@ -118,9 +119,11 @@ public class SimulationClient : MonoBehaviour
 
     private void InterpolateAndReconciliate()
     {
+        if (interpolationBuffer.Count == 0) return;
+        
+        Reconciliate(); // for client
         while (interpolationBuffer.Count >= requiredSnapshots && !tempDisconnect)
         {
-            Reconciliate(); // for client // TODO: capaz lo puedo poner en su propio while loop
             Interpolate(); // for other players
         }
     }
@@ -186,7 +189,6 @@ public class SimulationClient : MonoBehaviour
         var command = new Commands(inputNumber, forwards, rotate, shoot, timeout);
         
         commands.Add(command);
-        reconciliateCommands.Add(command);
         inputNumber++;
 
         return command;
@@ -201,7 +203,7 @@ public class SimulationClient : MonoBehaviour
         var _transform = cube.cubeGameObject.transform;
         Vector3 move = _transform.forward * command.forwards + Vector3.down * Utils.gravity;
         characterController.Move(move * (Utils.speed * Time.deltaTime));
-        transform.Rotate(new Vector3(0f, command.rotate * (Utils.rotateSpeed * Time.deltaTime), 0f));
+        _transform.Rotate(new Vector3(0f, command.rotate * (Utils.rotateSpeed * Time.deltaTime), 0f));
 
         if (command.shoot)
         {
@@ -223,7 +225,7 @@ public class SimulationClient : MonoBehaviour
             }
             packet.buffer.Flush();
 
-            if (connected && clientCube.port >= 0) Utils.Send(packet, channel, serverPort);
+            if (connected && clientCube.port >= 0) Utils.Send(packet, channel, Utils.serverPort);
         }
     }
 
@@ -235,14 +237,12 @@ public class SimulationClient : MonoBehaviour
         joinPacket.buffer.PutInt((int) Utils.Ports.JOIN);
         joinPacket.buffer.PutInt(clientId);
         joinPacket.buffer.Flush();
-        Utils.Send(joinPacket, channel, serverPort);
+        Utils.Send(joinPacket, channel, Utils.serverPort);
     }
 
     private void PlayerJoined(Packet packet)
     {
         var receivedId = packet.buffer.GetInt();
-
-        print($"player-{receivedId} joined");
         
         // Check if player joined is this client (server confirmation that I'm joined)
         if (!connected && receivedId == clientId)
@@ -251,10 +251,11 @@ public class SimulationClient : MonoBehaviour
             print($"and its me!");
             var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
             cubeGO.name = $"client-{clientId}";
-            var cube = new CubeEntity(cubeGO, receivedId);
+            print($"{cubeGO.name} joined");
+            // cubeGO.GetComponent<Renderer>().material.SetColor(Cyan, Color.cyan);
+            clientCube = new CubeEntity(cubeGO, receivedId);
             clientCharacterController = cubeGO.GetComponent<CharacterController>();
-            clientCube = cube;
-            cubeEntitiesClient[cube.port] = cube;
+            cubeEntitiesClient[clientCube.port] = clientCube;
             GameManager.clientId = clientId;
 
             var reconciliateGO = Instantiate(clientReconciliateCubePrefab, Utils.startPos, Quaternion.identity);
@@ -271,6 +272,7 @@ public class SimulationClient : MonoBehaviour
             for (int i = 0; i < previousCubesAmount; i++)
             {
                 int newCubeId = packet.buffer.GetInt();
+                if(i == 0) GameManager.clientId = newCubeId; // todo: WARN: hack to get camera to "work"
                 print($"1 friend with id {newCubeId}");
                 if (!cubeEntitiesClient.ContainsKey(Utils.GetPortFromId(newCubeId)))
                 {
@@ -293,6 +295,7 @@ public class SimulationClient : MonoBehaviour
             // If new player is not the client
             var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
             cubeGO.name = $"player-{receivedId}";
+            print($"{cubeGO.name} joined");
             cubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
             var cube = new CubeEntity(cubeGO, receivedId);
             cubeEntitiesClient[cube.port] = cube;
