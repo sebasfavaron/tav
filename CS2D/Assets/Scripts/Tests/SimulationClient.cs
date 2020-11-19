@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 using Random = UnityEngine.Random;
@@ -43,7 +44,7 @@ public class SimulationClient : MonoBehaviour
 
     private void FixedUpdate()
     {
-        ReadStoreApplySendInput(); // TODO: not using sendrate/pps?
+        ReadStoreApplySendInput();
         InterpolateAndReconciliate();
         
         // print($"clientid {clientId} == clientcubeid {clientCube.id} ~= clientcubeport {clientCube.port} ~= clientcubeGOname {clientCube.cubeGameObject.name}");
@@ -65,7 +66,7 @@ public class SimulationClient : MonoBehaviour
 
         if (!connected)
         {
-            Join(); // TODO: spam? maybe bring cooldown back for this only
+            Join();
         }
         
         Packet packet;
@@ -161,10 +162,10 @@ public class SimulationClient : MonoBehaviour
         }
 
         // 3. Apply reconciliate position and rotation to client (todo: maybe only do it if difference between clientCube and reconClientCube is greater than THRESHOLD)
-        var step = Vector3.Distance(clientCube.cubeGameObject.transform.position,
-            reconciliateClientCube.cubeGameObject.transform.position);
-        if (step > 0f) print(step);
-        if (step > 0.5f) print("something wrong");
+        // var step = Vector3.Distance(clientCube.cubeGameObject.transform.position,
+        //     reconciliateClientCube.cubeGameObject.transform.position);
+        // if (step > 0f) print(step);
+        // if (step > 0.5f) print("something wrong");
         
         clientCube.cubeGameObject.transform.position = reconciliateClientCube.cubeGameObject.transform.position;
         clientCube.cubeGameObject.transform.rotation = reconciliateClientCube.cubeGameObject.transform.rotation;
@@ -213,12 +214,6 @@ public class SimulationClient : MonoBehaviour
         Vector3 move = _transform.forward * command.forwards + Vector3.down * Utils.gravity;
         characterController.Move(move * (Utils.speed * Time.deltaTime));
         _transform.Rotate(new Vector3(0f, command.rotate * (Utils.rotateSpeed * Time.deltaTime), 0f));
-
-        if (command.shoot)
-        {
-            Gun gun = cube.cubeGameObject.GetComponent<Gun>();
-            if(gun != null) gun.Shoot(cube.cubeGameObject.transform);
-        }
     }
     
     private void SendInputs()
@@ -258,10 +253,9 @@ public class SimulationClient : MonoBehaviour
         if (!connected && receivedId == clientId)
         {
             // Add myself
-            print($"and its me!");
             var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
             cubeGO.name = $"client-{clientId}";
-            print($"{cubeGO.name} joined");
+            print($"I joined, I'm {cubeGO.name}");
             // cubeGO.GetComponent<Renderer>().material.SetColor(Cyan, Color.cyan);
             clientCube = new CubeEntity(cubeGO, receivedId);
             clientCharacterController = cubeGO.GetComponent<CharacterController>();
@@ -278,12 +272,10 @@ public class SimulationClient : MonoBehaviour
             
             // Now add all previously connected players
             int previousCubesAmount = packet.buffer.GetInt();
-            print($"client-{clientId} receiving join with {previousCubesAmount} friends");
+            print($"client-{clientId} receiving join with {previousCubesAmount} players");
             for (int i = 0; i < previousCubesAmount; i++)
             {
                 int newCubeId = packet.buffer.GetInt();
-                // if(i == 0) GameManager.clientId = newCubeId; // todo: WARN: hack to get camera to "work"
-                print($"1 friend with id {newCubeId}");
                 if (!cubeEntitiesClient.ContainsKey(Utils.GetPortFromId(newCubeId)))
                 {
                     var newCubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
@@ -314,36 +306,21 @@ public class SimulationClient : MonoBehaviour
     
     private void PlayerDied(Packet packet)
     {
-        var receivedId = packet.buffer.GetInt();
-        var port = Utils.GetPortFromId(receivedId);
+        var receivedPort = packet.buffer.GetInt();
+        print($"player {cubeEntitiesClient[receivedPort].cubeGameObject.name} died");
         
-        if (!cubeEntitiesClient.ContainsKey(port))
+        if (!cubeEntitiesClient.ContainsKey(receivedPort))
         {
-            cubeEntitiesClient.Remove(port);
+            if (receivedPort == clientCube.port)
+            {
+                print("GAME OVER");
+                Destroy(clientCube.cubeGameObject);
+            }
+            cubeEntitiesClient.Remove(receivedPort);
         }
     }
 
     private void OnDestroy() {
         channel.Disconnect();
-    }
-
-    public void TakeDamage(string cubeName, float damage)
-    {
-        var matchingCube = cubeEntitiesClient.Values.FirstOrDefault(c => c.cubeGameObject.transform.name.Equals(cubeName));
-
-        if (matchingCube != null)
-        {
-            var target = matchingCube.cubeGameObject.GetComponent<Target>();
-            if (target != null)
-            {
-                if (target.TakeDamage(damage) <= 0f)
-                {
-                    // Destroy and remove from Dictionary
-                    Destroy(matchingCube.cubeGameObject);
-                    cubeEntitiesClient.Remove(matchingCube.port);
-                    print($"killed {cubeName}");
-                }
-            }
-        }
     }
 }

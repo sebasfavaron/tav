@@ -6,11 +6,11 @@ public class Gun : MonoBehaviour
 
     public float damage = 10f;
     public float range = 100f;
-    public SimulationClient simulationClient;
+    public SimulationServer simulationServer;
 
     private void Start()
     {
-        simulationClient = FindObjectOfType<SimulationClient>();
+        simulationServer = FindObjectOfType<SimulationServer>();
     }
 
     public void Shoot(Transform _transform)
@@ -20,7 +20,7 @@ public class Gun : MonoBehaviour
         var ray = new Ray(originRay, _transform.forward);
         if (Physics.Raycast(ray, out hit, range))
         {
-            simulationClient.TakeDamage(hit.transform.name, damage);
+            simulationServer.TakeDamage(hit.transform.name, damage);
         }
     }
 }

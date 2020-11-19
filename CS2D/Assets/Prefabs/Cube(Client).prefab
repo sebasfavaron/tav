@@ -12,8 +12,6 @@ GameObject:
   - component: {fileID: 5732492077391170866}
   - component: {fileID: 5732492077391170867}
   - component: {fileID: -3313402112334401329}
-  - component: {fileID: 8910007528193444304}
-  - component: {fileID: 2696904784625867270}
   m_Layer: 9
   m_Name: Cube(Client)
   m_TagString: Player
@@ -100,34 +98,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8910007528193444304
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5732492077391170865}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b94a8f84e3cc8ed46a49c36c6af268e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  damage: 10
-  range: 100
-  simulationClient: {fileID: 0}
---- !u!114 &2696904784625867270
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5732492077391170865}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c70da3c4bf4c64948880c75fcce6aab4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  health: 50
 --- !u!1 &7979068515487330026
 GameObject:
   m_ObjectHideFlags: 0

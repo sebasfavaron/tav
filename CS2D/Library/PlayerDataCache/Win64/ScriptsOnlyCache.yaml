@@ -15,6 +15,8 @@ ScriptsOnlyBuild:
     - IngameDebugConsole.DebugLogRecycledListView
     - IngameDebugConsole.DebugLogResizeListener
     - IngameDebugConsole.DebugsOnScrollListener
+    Unity.Rider.Editor.dll:
+    - Packages.Rider.Editor.RiderScriptEditorData
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
     - UnityEditor.TestTools.TestRunner.TestListCacheData
@@ -66,10 +68,6 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 108
       Script: {instanceID: 0}
-    - Class: 114
-      Script: {instanceID: 10302}
-    - Class: 114
-      Script: {instanceID: 10334}
     - Class: 114
       Script: {instanceID: 10482}
     - Class: 114
@@ -156,6 +154,10 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 108
       Script: {instanceID: 0}
+    - Class: 114
+      Script: {instanceID: 10302}
+    - Class: 114
+      Script: {instanceID: 10334}
     - Class: 114
       Script: {instanceID: 11492}
     - Class: 115
@@ -538,7 +540,7 @@ ScriptsOnlyBuild:
     className: NoiseSettings
   - hash:
       serializedVersion: 2
-      Hash: 1e10c0a56aa94ca2260c744ee4e8ce7f
+      Hash: 8021d04b7d8433b8ef7a958652df7892
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Gun

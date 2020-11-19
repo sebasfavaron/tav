@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
@@ -90,6 +91,12 @@ public class SimulationServer : MonoBehaviour
                 Vector3 move = _transform.forward * command.forwards + Vector3.down * Utils.gravity;
                 cubeGO.GetComponent<CharacterController>().Move(move * (Utils.speed * Time.deltaTime));
                 _transform.Rotate(new Vector3(0f, command.rotate * (Utils.rotateSpeed * Time.deltaTime), 0f));
+                
+                if (command.shoot)
+                {
+                    Gun gun = cube.cubeGameObject.GetComponent<Gun>();
+                    if(gun != null) gun.Shoot(cube.cubeGameObject.transform);
+                }
                 
                 max = Mathf.Max(command.inputNumber, max);
             }
@@ -223,6 +230,36 @@ public class SimulationServer : MonoBehaviour
             packet.buffer.Flush();
 
             ReceiveInputs(packet);
+        }
+    }
+    
+    public void TakeDamage(string cubeName, float damage)
+    {
+        var matchingCube = cubeEntitiesServer.Values.FirstOrDefault(c => c.cubeGameObject.transform.name.Equals(cubeName));
+
+        if (matchingCube != null)
+        {
+            var target = matchingCube.cubeGameObject.GetComponent<Target>();
+            if (target != null)
+            {
+                if (target.TakeDamage(damage) <= 0f)
+                {
+                    foreach (var kv in cubeEntitiesServer)
+                    {
+                        var packet = Packet.Obtain();
+                        packet.buffer.PutInt((int) Utils.Ports.PLAYER_DIED);
+                        packet.buffer.PutInt(kv.Key);
+                        packet.buffer.PutInt(matchingCube.port);
+                        packet.buffer.Flush();
+                        Utils.Send(packet, channel, kv.Value.port);
+                    }
+                
+                    // Destroy and remove from Dictionary
+                    Destroy(matchingCube.cubeGameObject);
+                    cubeEntitiesServer.Remove(matchingCube.port);
+                    print($"killed {cubeName}");
+                }
+            }
         }
     }
     
