@@ -38,6 +38,7 @@ public class SimulationClient : MonoBehaviour
         cubeEntitiesClient = new Dictionary<int, CubeEntity>();
         clientId = Random.Range(0, 1000000);
         channel = new Channel(Utils.GetPortFromId(clientId));
+        GameObject.Find("Players(Client)").transform.position = Vector3.zero;
     }
 
     private void FixedUpdate()
@@ -82,10 +83,13 @@ public class SimulationClient : MonoBehaviour
                 case (int) Utils.Ports.PLAYER_JOINED:
                     PlayerJoined(packet);
                     break;
+                case (int) Utils.Ports.PLAYER_DIED:
+                    PlayerDied(packet);
+                    break;
             }
         }
     }
-
+    
     private void AckInputs(Packet packet)
     {
         if (!connected) return;
@@ -157,6 +161,11 @@ public class SimulationClient : MonoBehaviour
         }
 
         // 3. Apply reconciliate position and rotation to client (todo: maybe only do it if difference between clientCube and reconClientCube is greater than THRESHOLD)
+        var step = Vector3.Distance(clientCube.cubeGameObject.transform.position,
+            reconciliateClientCube.cubeGameObject.transform.position);
+        if (step > 0f) print(step);
+        if (step > 0.5f) print("something wrong");
+        
         clientCube.cubeGameObject.transform.position = reconciliateClientCube.cubeGameObject.transform.position;
         clientCube.cubeGameObject.transform.rotation = reconciliateClientCube.cubeGameObject.transform.rotation;
     }
@@ -207,7 +216,8 @@ public class SimulationClient : MonoBehaviour
 
         if (command.shoot)
         {
-            // TODO: shoot mechanic with physics.raycast
+            Gun gun = cube.cubeGameObject.GetComponent<Gun>();
+            if(gun != null) gun.Shoot(cube.cubeGameObject.transform);
         }
     }
     
@@ -272,7 +282,7 @@ public class SimulationClient : MonoBehaviour
             for (int i = 0; i < previousCubesAmount; i++)
             {
                 int newCubeId = packet.buffer.GetInt();
-                if(i == 0) GameManager.clientId = newCubeId; // todo: WARN: hack to get camera to "work"
+                // if(i == 0) GameManager.clientId = newCubeId; // todo: WARN: hack to get camera to "work"
                 print($"1 friend with id {newCubeId}");
                 if (!cubeEntitiesClient.ContainsKey(Utils.GetPortFromId(newCubeId)))
                 {
@@ -302,7 +312,38 @@ public class SimulationClient : MonoBehaviour
         }
     }
     
+    private void PlayerDied(Packet packet)
+    {
+        var receivedId = packet.buffer.GetInt();
+        var port = Utils.GetPortFromId(receivedId);
+        
+        if (!cubeEntitiesClient.ContainsKey(port))
+        {
+            cubeEntitiesClient.Remove(port);
+        }
+    }
+
     private void OnDestroy() {
         channel.Disconnect();
+    }
+
+    public void TakeDamage(string cubeName, float damage)
+    {
+        var matchingCube = cubeEntitiesClient.Values.FirstOrDefault(c => c.cubeGameObject.transform.name.Equals(cubeName));
+
+        if (matchingCube != null)
+        {
+            var target = matchingCube.cubeGameObject.GetComponent<Target>();
+            if (target != null)
+            {
+                if (target.TakeDamage(damage) <= 0f)
+                {
+                    // Destroy and remove from Dictionary
+                    Destroy(matchingCube.cubeGameObject);
+                    cubeEntitiesClient.Remove(matchingCube.port);
+                    print($"killed {cubeName}");
+                }
+            }
+        }
     }
 }

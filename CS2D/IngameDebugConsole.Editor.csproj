@@ -255,6 +255,9 @@
  <Reference Include="UnityEditor.WindowsStandalone.Extensions">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2019.2.12f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
  </Reference>
+ <Reference Include="clipper_library">
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/PackageCache/com.unity.cinemachine@2.7.1/Runtime/ThirdParty/clipper_library.dll</HintPath>
+ </Reference>
  <Reference Include="nunit.framework">
  <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/PackageCache/com.unity.ext.nunit@1.0.0/net35/unity-custom/nunit.framework.dll</HintPath>
  </Reference>

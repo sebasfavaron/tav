@@ -56,7 +56,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\CameraFollow.cs" />
+     <Compile Include="Assets\Gun.cs" />
      <Compile Include="Assets\Scripts\Client.cs" />
      <Compile Include="Assets\Scripts\Client\PlayerController.cs" />
      <Compile Include="Assets\Scripts\Client\PlayerNetworkView.cs" />
@@ -76,6 +76,7 @@
      <Compile Include="Assets\Scripts\Server\GameData.cs" />
      <Compile Include="Assets\Scripts\Server\Player.cs" />
      <Compile Include="Assets\Scripts\Server\PlayerData.cs" />
+     <Compile Include="Assets\Scripts\Tests\CameraFollow.cs" />
      <Compile Include="Assets\Scripts\Tests\Commands.cs" />
      <Compile Include="Assets\Scripts\Tests\ConnectionTest.cs" />
      <Compile Include="Assets\Scripts\Tests\CubeEntity.cs" />
@@ -87,6 +88,7 @@
      <Compile Include="Assets\Scripts\Tests\SimulationServer.cs" />
      <Compile Include="Assets\Scripts\Tests\SimulationTest.cs" />
      <Compile Include="Assets\Scripts\Tests\Snapshot.cs" />
+     <Compile Include="Assets\Scripts\Tests\Target.cs" />
      <Compile Include="Assets\Scripts\Tests\Utils.cs" />
      <Compile Include="Assets\Scripts\Utils\GameObjectPool.cs" />
      <Compile Include="Assets\Scripts\Utils\GenericPool.cs" />
@@ -97,6 +99,9 @@
      <Compile Include="Assets\Scripts\Utils\Singleton.cs" />
  <Reference Include="Unity.Timeline.Editor">
  <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+ </Reference>
+ <Reference Include="Cinemachine">
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Cinemachine.dll</HintPath>
  </Reference>
  <Reference Include="Unity.VSCode.Editor">
  <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
@@ -115,6 +120,9 @@
  </Reference>
  <Reference Include="Unity.Rider.Editor">
  <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
+ </Reference>
+ <Reference Include="com.unity.cinemachine.editor">
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/com.unity.cinemachine.editor.dll</HintPath>
  </Reference>
  <Reference Include="Unity.TextMeshPro">
  <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
@@ -298,6 +306,9 @@
  </Reference>
  <Reference Include="UnityEngine.XRModule">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2019.2.12f1/Editor/Data/Managed/UnityEngine/UnityEngine.XRModule.dll</HintPath>
+ </Reference>
+ <Reference Include="clipper_library">
+ <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/PackageCache/com.unity.cinemachine@2.7.1/Runtime/ThirdParty/clipper_library.dll</HintPath>
  </Reference>
  <Reference Include="netstandard">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2019.2.12f1/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>

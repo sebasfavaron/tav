@@ -40,22 +40,17 @@ public class Snapshot
     public static Snapshot CreateInterpolated(Snapshot previous, Snapshot next, float t, int clientId)
     {
         Dictionary<int, CubeEntity> cubeEntities = new Dictionary<int, CubeEntity>();
-        int cnt = 0;
         foreach (var kv in previous.cubeEntities)
         {
             if (kv.Value.id != clientId) // Do not interpolate client
             {
-                // Debug.Log(kv.Value.id);
-                if(kv.Value.cubeGameObject.name.Contains("client")) Debug.Log("GOT YOU! createinterp");
+                // var step = Vector3.Distance(kv.Value.cubeGameObject.transform.position,
+                //     next.cubeEntities[kv.Key].cubeGameObject.transform.position);
+                // if (step > 0f) Debug.Log(step);
+                // if (step > 0.5f) Debug.Log("something wrong");
                 cubeEntities[kv.Key] = CubeEntity.createInterpolated(kv.Value, next.cubeEntities[kv.Key], t);
             }
-            else
-            {
-                cnt++;
-                // Debug.Log($"dont interpolate me, im client");
-            }
         }
-        // Debug.Log(cnt);
         return new Snapshot(cubeEntities, -1);
     }
 
@@ -65,7 +60,6 @@ public class Snapshot
         {
             if (cubeEntity.Value.id != clientId) // Do not interpolate client
             {
-                if(cubeEntity.Value.cubeGameObject.name.Contains("client")) Debug.Log("GOT YOU! apply");
                 cubeEntity.Value.Apply();
             }
         }

@@ -11,6 +11,7 @@ public class CubeEntity
     public Vector3 position;
     public Quaternion rotation;
     public GameObject cubeGameObject;
+    public float health = 50f;
 
     // Connection info
     public int port;
@@ -57,6 +58,7 @@ public class CubeEntity
         buffer.PutFloat(rotation.x);
         buffer.PutFloat(rotation.y);
         buffer.PutFloat(rotation.z);
+        buffer.PutFloat(health);
     }
     
     public void Deserialize(BitBuffer buffer) {
@@ -70,6 +72,7 @@ public class CubeEntity
         rotation.x = buffer.GetFloat();
         rotation.y = buffer.GetFloat();
         rotation.z = buffer.GetFloat();
+        health = buffer.GetFloat();
     }
 
     public static CubeEntity createInterpolated(CubeEntity previous, CubeEntity next, float t)
