@@ -21,6 +21,7 @@ public class Snapshot
         buffer.PutInt(packetNumber);
         foreach (var kv in cubeEntities)
         {
+            buffer.PutInt(kv.Key);
             kv.Value.Serialize(buffer);
         }
     }
@@ -28,12 +29,10 @@ public class Snapshot
     public void Deserialize(BitBuffer buffer)
     {
         packetNumber = buffer.GetInt();
-        foreach (var kv in cubeEntities)
+        while (buffer.HasRemaining())  // In case new players haven't been added to the client yet
         {
-            if (buffer.HasRemaining())  // In case new players haven't been added to the client yet
-            {
-                kv.Value.Deserialize(buffer);
-            }
+            var key = buffer.GetInt();
+            cubeEntities[key].Deserialize(buffer);
         }
     }
     

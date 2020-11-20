@@ -250,13 +250,12 @@ public class SimulationClient : MonoBehaviour
         var receivedId = packet.buffer.GetInt();
         
         // Check if player joined is this client (server confirmation that I'm joined)
-        if (!connected && receivedId == clientId)
+        if (!connected && (receivedId == clientId))
         {
             // Add myself
             var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
             cubeGO.name = $"client-{clientId}";
             print($"I joined, I'm {cubeGO.name}");
-            // cubeGO.GetComponent<Renderer>().material.SetColor(Cyan, Color.cyan);
             clientCube = new CubeEntity(cubeGO, receivedId);
             clientCharacterController = cubeGO.GetComponent<CharacterController>();
             cubeEntitiesClient[clientCube.port] = clientCube;
@@ -307,7 +306,7 @@ public class SimulationClient : MonoBehaviour
     private void PlayerDied(Packet packet)
     {
         var receivedPort = packet.buffer.GetInt();
-        print($"player {cubeEntitiesClient[receivedPort].cubeGameObject.name} died");
+        print($"player {cubeEntitiesClient[receivedPort].cubeGameObject.name} died, he had port {receivedPort}");
         
         if (!cubeEntitiesClient.ContainsKey(receivedPort))
         {

@@ -5,22 +5,22 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class SimulationServer : MonoBehaviour
 {
-    public int pps = 100;
-    private bool oneClientConnected = false;
+    public int pps = 60;
 
     private Channel channel;
     
     [SerializeField] private GameObject serverCubePrefab;
+    [SerializeField] private GameObject playerUICanvas;
     private Dictionary<int, CubeEntity> cubeEntitiesServer;
     private Dictionary<int, CubeEntity> bots;
     private List<int> portsUsed;
     private Dictionary<int, int> packetNumbers; // packetNumbers[cubePort] = cubePacketNumber
     private Dictionary<int, int> maxInputs; // maxInputs[cubePort] = cubeMaxInput
-    private List<int> keysOfCubesToDebug;
 
     // Start is called before the first frame update
     public void Start()
@@ -30,7 +30,6 @@ public class SimulationServer : MonoBehaviour
         cubeEntitiesServer = new Dictionary<int, CubeEntity>();
         bots = new Dictionary<int, CubeEntity>();
         portsUsed = new List<int>();
-        keysOfCubesToDebug = new List<int>();
         packetNumbers = new Dictionary<int, int>();
         maxInputs = new Dictionary<int, int>();
         InvokeRepeating(nameof(BotRandomMove), 1f, 0.2f);
@@ -75,10 +74,9 @@ public class SimulationServer : MonoBehaviour
         int port = Utils.GetPortFromId(id);
         if (!cubeEntitiesServer.ContainsKey(port)) return;
         
-        // if(keysOfCubesToDebug.Contains(port)) print($"client-{id} sent inputs");
         var cube = cubeEntitiesServer[port];
         
-        int max = 0, amountOfCommandsToProcess = packet.buffer.GetInt();
+        int prevMax = maxInputs[port], amountOfCommandsToProcess = packet.buffer.GetInt();
         for (int i = 0; i < amountOfCommandsToProcess; i++)
         {
             var command = new Commands();
@@ -97,23 +95,22 @@ public class SimulationServer : MonoBehaviour
                     Gun gun = cube.cubeGameObject.GetComponent<Gun>();
                     if(gun != null) gun.Shoot(cube.cubeGameObject.transform);
                 }
-                
-                max = Mathf.Max(command.inputNumber, max);
+
+                maxInputs[port] = command.inputNumber;
             }
         }
 
         // send ack
-        if (!cube.isBot) SendAck(max, cube.port);
+        if (!cube.isBot && maxInputs[port] > prevMax) SendAck(cube.port);
     }
 
-    private void SendAck(int max, int port)
+    private void SendAck(int port)
     {
         var packet3 = Packet.Obtain();
         packet3.buffer.PutInt((int) Utils.Ports.ACK);
-        packet3.buffer.PutInt(max);
+        packet3.buffer.PutInt(maxInputs[port]);
         packet3.buffer.Flush();
         Utils.Send(packet3, channel, port);
-        maxInputs[port] = Mathf.Max(max, maxInputs[port]);
     }
 
     private void ReceiveJoins(Packet packet, bool isBot = false)
@@ -161,6 +158,11 @@ public class SimulationServer : MonoBehaviour
     {
         // init new player
         var cubeGO = Instantiate(serverCubePrefab, Utils.startPos, Quaternion.identity);
+        var canvas = Instantiate(playerUICanvas, new Vector3(), Quaternion.identity);
+        canvas.transform.SetParent(cubeGO.transform);
+        canvas.transform.localPosition = new Vector3(0f, 2f, 0f);
+        var text = canvas.GetComponentInChildren<Text>();
+        if(text != null) text.text = $"{id}";
         var newCube = new CubeEntity(cubeGO, id, isBot);
         cubeGO.name = $"server-{id}";
         cubeGO.transform.SetParent(GameObject.Find("Players(Server)").transform);
@@ -174,12 +176,6 @@ public class SimulationServer : MonoBehaviour
             packetNumbers[newCube.port] = 0;
             maxInputs[newCube.port] = 0;
         }
-
-        if (oneClientConnected)
-        {
-            keysOfCubesToDebug.Add(newCube.port);
-        }
-        oneClientConnected = true;
         
         foreach (var cube in cubeEntitiesServer.Values)
         {
@@ -248,7 +244,7 @@ public class SimulationServer : MonoBehaviour
                     {
                         var packet = Packet.Obtain();
                         packet.buffer.PutInt((int) Utils.Ports.PLAYER_DIED);
-                        packet.buffer.PutInt(kv.Key);
+                        print($"sending dead port {matchingCube.port} to {kv.Value.port}"); // 
                         packet.buffer.PutInt(matchingCube.port);
                         packet.buffer.Flush();
                         Utils.Send(packet, channel, kv.Value.port);

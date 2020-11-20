@@ -3,7 +3,7 @@
 public class CameraFollow : MonoBehaviour
 {
 
-    public Transform target;
+    public Transform target = null;
     public float smoothSpeed = 0.9f;
     public Vector3 offset;
     
@@ -18,14 +18,6 @@ public class CameraFollow : MonoBehaviour
             if (client != null)
             {
                 target = client.transform;
-            }
-            else
-            {
-                client = GameObject.Find($"player-{clientId}");
-                if (client != null)
-                {
-                    target = client.transform;
-                }    
             }
         }
         else

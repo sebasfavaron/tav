@@ -155,18 +155,36 @@ ScriptsOnlyBuild:
     - Class: 108
       Script: {instanceID: 0}
     - Class: 114
+      Script: {instanceID: 9682}
+    - Class: 114
+      Script: {instanceID: 9864}
+    - Class: 114
       Script: {instanceID: 10302}
     - Class: 114
       Script: {instanceID: 10334}
     - Class: 114
+      Script: {instanceID: 10350}
+    - Class: 114
+      Script: {instanceID: 11358}
+    - Class: 114
       Script: {instanceID: 11492}
+    - Class: 114
+      Script: {instanceID: 11762}
     - Class: 115
+      Script: {instanceID: 0}
+    - Class: 128
       Script: {instanceID: 0}
     - Class: 136
       Script: {instanceID: 0}
     - Class: 143
       Script: {instanceID: 0}
     - Class: 157
+      Script: {instanceID: 0}
+    - Class: 222
+      Script: {instanceID: 0}
+    - Class: 223
+      Script: {instanceID: 0}
+    - Class: 224
       Script: {instanceID: 0}
     Assets/Scene/StartMenu.unity:
     - Class: 1
@@ -972,7 +990,7 @@ ScriptsOnlyBuild:
     className: Cinemachine3rdPersonAim
   - hash:
       serializedVersion: 2
-      Hash: a3efa10316f433dc8c4d13c3a1f77f67
+      Hash: 9a6805293df6e02c95c2feb19cb202c6
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: SimulationServer

@@ -21,12 +21,13 @@
   <component name="ChangeListManager">
     <list default="true" id="aed4878d-6d98-441a-9717-bd53460cb4a3" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.CS2D/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CS2D/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Gun.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Gun.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Cube(Client).prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Cube(Client).prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Cube(Server).prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Cube(Server).prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scene/ServerScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scene/ServerScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/CameraFollow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/CameraFollow.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationServer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/InspectorExpandedItems.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Library/InspectorExpandedItems.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tests/Snapshot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tests/Snapshot.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/LastBuild.buildreport" beforeDir="false" afterPath="$PROJECT_DIR$/Library/LastBuild.buildreport" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/Managed/Assembly-CSharp.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/Managed/Assembly-CSharp.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/Managed/Cinemachine.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/Managed/Cinemachine.dll" afterDir="false" />
@@ -37,22 +38,23 @@
       <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/globalgamemanagers" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/globalgamemanagers" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/globalgamemanagers.assets" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/globalgamemanagers.assets" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/level0" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/level0" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/level1" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/level1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/level3" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/level3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/sharedassets1.assets" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/sharedassets1.assets" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/sharedassets2.assets" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/sharedassets2.assets" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/sharedassets3.assets" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/Data/sharedassets3.assets" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/ScriptsOnlyCache.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Library/PlayerDataCache/Win64/ScriptsOnlyCache.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/ProtocolInstance.json" beforeDir="false" afterPath="$PROJECT_DIR$/Library/ProtocolInstance.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Library/ScriptAssemblies/Assembly-CSharp.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/StateCache/Hierarchy/4c969a-mainStage.json" beforeDir="false" afterPath="$PROJECT_DIR$/Library/StateCache/Hierarchy/4c969a-mainStage.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/StateCache/SceneView/cc2798-4a2c160efb06cf742a.json" beforeDir="false" afterPath="$PROJECT_DIR$/Library/StateCache/SceneView/cc2798-4a2c160efb06cf742a.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/StateCache/SceneView/cc2798-mainStage.json" beforeDir="false" afterPath="$PROJECT_DIR$/Library/StateCache/SceneView/cc2798-mainStage.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/assetDatabase3" beforeDir="false" afterPath="$PROJECT_DIR$/Library/assetDatabase3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/metadata/13/1311777dcb5f1154a84cbc455218c953" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/13/1311777dcb5f1154a84cbc455218c953" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/metadata/13/1311777dcb5f1154a84cbc455218c953.info" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/13/1311777dcb5f1154a84cbc455218c953.info" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/metadata/4a/4a2c160efb06cf742a60b12372836b60" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/4a/4a2c160efb06cf742a60b12372836b60" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/metadata/4a/4a2c160efb06cf742a60b12372836b60.info" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/4a/4a2c160efb06cf742a60b12372836b60.info" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/metadata/96/96645c69c334a0a4684045a105e625d8" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/96/96645c69c334a0a4684045a105e625d8" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/metadata/98/982debb929dfa4e818c5cba0c83c6031" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/98/982debb929dfa4e818c5cba0c83c6031" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/metadata/b7/b741416da3fa46e4cb0aacb3b1e54101" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/b7/b741416da3fa46e4cb0aacb3b1e54101" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Library/metadata/b9/b94a8f84e3cc8ed46a49c36c6af268e7" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/b9/b94a8f84e3cc8ed46a49c36c6af268e7" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/metadata/e0/e0d63ee593484b7428c96eee1e80c847" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/e0/e0d63ee593484b7428c96eee1e80c847" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Library/metadata/f3/f3dd994ec01e415eb528c2684e1e7421" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/f3/f3dd994ec01e415eb528c2684e1e7421" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Library/metadata/fa/fa02bd97f8592b9459c3f9599458eaa1" beforeDir="false" afterPath="$PROJECT_DIR$/Library/metadata/fa/fa02bd97f8592b9459c3f9599458eaa1" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -96,16 +98,16 @@
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/Commands.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/GameManager.cs" />
         <option value="$PROJECT_DIR$/Assets/CameraFollow.cs" />
-        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" />
-        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/CameraFollow.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/Target.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/Gun.cs" />
-        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/Snapshot.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/Utils.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/CubeEntity.cs" />
         <option value="$PROJECT_DIR$/Assets/Gun.cs" />
-        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationServer.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationTest.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/CameraFollow.cs" />
         <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/SimulationServer.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/Tests/Snapshot.cs" />
       </list>
     </option>
   </component>
@@ -187,7 +189,7 @@
       <workItem from="1605468313757" duration="5788000" />
       <workItem from="1605567657732" duration="5548000" />
       <workItem from="1605646374384" duration="28593000" />
-      <workItem from="1605805760815" duration="13153000" />
+      <workItem from="1605805760815" duration="22527000" />
     </task>
     <servers />
   </component>
@@ -284,14 +286,14 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="361" y="144" key="Rider.ProjectTemplateDialog.Size/0.0.1536.824@0.0.1536.824" timestamp="1600203982615" />
-    <state x="93" y="93" width="1350" height="638" key="VCS.FileHistoryDialog" timestamp="1602880938171">
+    <state x="93" y="93" width="1350" height="638" key="VCS.FileHistoryDialog" timestamp="1605826168604">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="93" y="93" width="1350" height="638" key="VCS.FileHistoryDialog/0.0.1536.824@0.0.1536.824" timestamp="1602880938171" />
-    <state x="449" y="145" width="693" height="624" key="find.popup" timestamp="1605819756546">
+    <state x="93" y="93" width="1350" height="638" key="VCS.FileHistoryDialog/0.0.1536.824@0.0.1536.824" timestamp="1605826168604" />
+    <state x="449" y="145" width="693" height="624" key="find.popup" timestamp="1605829927876">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="449" y="145" width="693" height="624" key="find.popup/0.0.1536.824@0.0.1536.824" timestamp="1605819756546" />
+    <state x="449" y="145" width="693" height="624" key="find.popup/0.0.1536.824@0.0.1536.824" timestamp="1605829927876" />
     <state x="425" y="187" key="run.anything.popup" timestamp="1605807043318">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -300,24 +302,5 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1604615873432" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Assets/Scripts/Tests/SimulationClient.cs</url>
-          <line>255</line>
-          <properties documentPath="D:\itba\tav (tecnicas avanzadas de videojuegos)\tav (sebas)\CS2D\Assets\Scripts\Tests\SimulationClient.cs" initialLine="257">
-            <startOffsets>
-              <option value="8693" />
-            </startOffsets>
-            <endOffsets>
-              <option value="8715" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

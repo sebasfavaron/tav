@@ -35,6 +35,8 @@ public class SimulationTest : MonoBehaviour
         todo que sea el ultimo player y no el 1ro debe tener que ver con que no habia ningun player conectado esta vez (las anteriores estaba el 1ro y otros conectados)
         
         todo mañana hacer step into a ver si spawnea en 0,3,0 y al toque se tpea al 1er player
+        
+        todo ver ultimo inputNumber recibido en client y si el snapshot esta aplicando el movimiento al cubo correcto
     */
     
 }
