@@ -20,6 +20,7 @@ public class Utils
     public static float gravity = 1f;
     public static float speed = 8f;
     public static Vector3 startPos = new Vector3(0f, 6f, 0f);
+    public static Vector3 waitRoomPos = new Vector3(0f, -100f, 0f);
     public static float rotateSpeed = 200f;
 
 
@@ -40,5 +41,10 @@ public class Utils
     public static int GetPortFromId(int id)
     {
         return 9000 + id % 1000;
+    }
+
+    public static Vector3 RandomStartPos()
+    {
+        return startPos + new Vector3(Random.Range(-5f, 5f), 0f, Random.Range(-5f, 5f));
     }
 }

@@ -3,11 +3,9 @@ ScriptsOnlyBuild:
     Assembly-CSharp.dll:
     - CameraFollow
     - GameManager
-    - Gun
     - LoadScenes
     - SimulationClient
     - SimulationServer
-    - Target
     IngameDebugConsole.Runtime.dll:
     - IngameDebugConsole.DebugLogItem
     - IngameDebugConsole.DebugLogManager
@@ -110,10 +108,6 @@ ScriptsOnlyBuild:
     - Class: 108
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 10302}
-    - Class: 114
-      Script: {instanceID: 10334}
-    - Class: 114
       Script: {instanceID: 10646}
     - Class: 114
       Script: {instanceID: 11492}
@@ -158,10 +152,6 @@ ScriptsOnlyBuild:
       Script: {instanceID: 9682}
     - Class: 114
       Script: {instanceID: 9864}
-    - Class: 114
-      Script: {instanceID: 10302}
-    - Class: 114
-      Script: {instanceID: 10334}
     - Class: 114
       Script: {instanceID: 10350}
     - Class: 114
@@ -570,7 +560,7 @@ ScriptsOnlyBuild:
     className: CinemachineConfiner2D
   - hash:
       serializedVersion: 2
-      Hash: c4e17c1f6352497cc7f8ce6fe59ea046
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Target

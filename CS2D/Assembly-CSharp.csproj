@@ -82,6 +82,7 @@
      <Compile Include="Assets\Scripts\Tests\CubeEntity.cs" />
      <Compile Include="Assets\Scripts\Tests\FakeChannel.cs" />
      <Compile Include="Assets\Scripts\Tests\GameManager.cs" />
+     <Compile Include="Assets\Scripts\Tests\HitPackage.cs" />
      <Compile Include="Assets\Scripts\Tests\LoadScenes.cs" />
      <Compile Include="Assets\Scripts\Tests\MyLogHandler.cs" />
      <Compile Include="Assets\Scripts\Tests\SimulationClient.cs" />

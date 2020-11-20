@@ -10,46 +10,54 @@ public class CubeEntity
     public int id;
     public Vector3 position;
     public Quaternion rotation;
-    public GameObject cubeGameObject;
+    public GameObject GO;
+    
     public float health = 50f;
-
+    public float gunRange = 100f;
+    public float gunDamage = 5f;
+    
     // Connection info
     public int port;
     public int maxInputReceived;
-    
-    public CubeEntity(GameObject cubeGameObject, int id, bool isBot = false)
+    public int points;
+
+    public CubeEntity(GameObject go, int id, bool isBot = false)
     {
-        this.cubeGameObject = cubeGameObject;
+        GO = go;
         this.id = id;
-        this.port = Utils.GetPortFromId(id);
-        this.maxInputReceived = -1;
+        port = Utils.GetPortFromId(id);
+        maxInputReceived = -1;
         this.isBot = isBot;
+        points = 0;
     }
 
-    public CubeEntity(Vector3 position, Quaternion rotation, GameObject cubeGameObject)
+    public CubeEntity(Vector3 position, Quaternion rotation, GameObject go)
     {
         this.position = position;
         this.rotation = rotation;
-        this.cubeGameObject = cubeGameObject;
-        this.port = -1;
-        this.maxInputReceived = -1;
-        this.isBot = false;
+        GO = go;
+        id = -1;
+        port = -1;
+        maxInputReceived = -1;
+        isBot = false;
+        points = 0;
     }
     
     public CubeEntity(CubeEntity original)
     {
-        this.cubeGameObject = original.cubeGameObject;
-        this.id = original.id;
-        this.position = new Vector3(original.position.x, original.position.y, original.position.z);
-        this.rotation = new Quaternion(original.rotation.x, original.rotation.y, original.rotation.z, original.rotation.w);
-        this.port = -1;
-        this.maxInputReceived = -1;
+        GO = original.GO;
+        id = original.id;
+        position = new Vector3(original.position.x, original.position.y, original.position.z);
+        rotation = new Quaternion(original.rotation.x, original.rotation.y, original.rotation.z, original.rotation.w);
+        port = original.port;
+        maxInputReceived = original.maxInputReceived;
+        points = original.points;
     }
 
     public void Serialize(BitBuffer buffer)
     {
-        var position = cubeGameObject.transform.position;
-        var rotation = cubeGameObject.transform.rotation;
+        var position = GO.transform.position;
+        var rotation = GO.transform.rotation;
         buffer.PutInt(maxInputReceived);
         buffer.PutFloat(position.x);
         buffer.PutFloat(position.y);
@@ -77,7 +85,7 @@ public class CubeEntity
 
     public static CubeEntity createInterpolated(CubeEntity previous, CubeEntity next, float t)
     {
-        var cubeEntity = new CubeEntity(previous.cubeGameObject, previous.id);
+        var cubeEntity = new CubeEntity(previous.GO, previous.id);
         cubeEntity.position = cubeEntity.position + Vector3.Lerp(previous.position, next.position, t);
         next.rotation = new Quaternion(next.rotation.x + 0.001f, next.rotation.y + 0.001f, next.rotation.z + 0.001f, next.rotation.w + 0.001f);
         var deltaRot= Quaternion.Lerp(previous.rotation, next.rotation, t);
@@ -95,8 +103,28 @@ public class CubeEntity
 
     public void Apply()
     {
-        cubeGameObject.transform.position = position;
-        cubeGameObject.transform.rotation = rotation;
+        GO.transform.position = position;
+        GO.transform.rotation = rotation;
+    }
+    
+    public HitPackage Shoot()
+    {
+        RaycastHit hit;
+        var _transform = GO.transform;
+        Vector3 originRay = _transform.position + _transform.forward * 0.6f;
+        var ray = new Ray(originRay, _transform.forward);
+        if (Physics.Raycast(ray, out hit, gunRange))
+        {
+            return new HitPackage(hit.transform.name, port, gunDamage);
+        }
+
+        return null;
+    }
+    
+    public float TakeDamage(float amount)
+    {
+        health -= amount;
+        return health;
     }
     
 }

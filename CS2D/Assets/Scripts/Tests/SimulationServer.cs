@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -18,9 +15,9 @@ public class SimulationServer : MonoBehaviour
     [SerializeField] private GameObject playerUICanvas;
     private Dictionary<int, CubeEntity> cubeEntitiesServer;
     private Dictionary<int, CubeEntity> bots;
-    private List<int> portsUsed;
-    private Dictionary<int, int> packetNumbers; // packetNumbers[cubePort] = cubePacketNumber
-    private Dictionary<int, int> maxInputs; // maxInputs[cubePort] = cubeMaxInput
+    private List<int> idsUsed;
+    private Dictionary<int, int> packetNumbers; // packetNumbers[cubeId] = cubePacketNumber
+    private Dictionary<int, int> maxInputs; // maxInputs[cubeId] = cubeMaxInput
 
     // Start is called before the first frame update
     public void Start()
@@ -29,7 +26,7 @@ public class SimulationServer : MonoBehaviour
 
         cubeEntitiesServer = new Dictionary<int, CubeEntity>();
         bots = new Dictionary<int, CubeEntity>();
-        portsUsed = new List<int>();
+        idsUsed = new List<int>();
         packetNumbers = new Dictionary<int, int>();
         maxInputs = new Dictionary<int, int>();
         InvokeRepeating(nameof(BotRandomMove), 1f, 0.2f);
@@ -71,20 +68,19 @@ public class SimulationServer : MonoBehaviour
     private void ReceiveInputs(Packet packet)
     {
         int id = packet.buffer.GetInt();
-        int port = Utils.GetPortFromId(id);
-        if (!cubeEntitiesServer.ContainsKey(port)) return;
+        if (!cubeEntitiesServer.ContainsKey(id)) return;
         
-        var cube = cubeEntitiesServer[port];
+        var cube = cubeEntitiesServer[id];
         
-        int prevMax = maxInputs[port], amountOfCommandsToProcess = packet.buffer.GetInt();
+        int prevMax = maxInputs[id], amountOfCommandsToProcess = packet.buffer.GetInt();
         for (int i = 0; i < amountOfCommandsToProcess; i++)
         {
             var command = new Commands();
             command.Deserialize(packet.buffer);
 
-            if (command.inputNumber > maxInputs[port])
+            if (command.inputNumber > maxInputs[id])
             {
-                var cubeGO = cube.cubeGameObject;
+                var cubeGO = cube.GO;
                 var _transform = cubeGO.transform;
                 Vector3 move = _transform.forward * command.forwards + Vector3.down * Utils.gravity;
                 cubeGO.GetComponent<CharacterController>().Move(move * (Utils.speed * Time.deltaTime));
@@ -92,43 +88,39 @@ public class SimulationServer : MonoBehaviour
                 
                 if (command.shoot)
                 {
-                    Gun gun = cube.cubeGameObject.GetComponent<Gun>();
-                    if(gun != null) gun.Shoot(cube.cubeGameObject.transform);
+                    var hitPackage = cube.Shoot();
+                    if (hitPackage != null)
+                    {
+                        TakeDamage(hitPackage.hitName, hitPackage.damage, hitPackage.shooterId);
+                    }
                 }
 
-                maxInputs[port] = command.inputNumber;
+                maxInputs[id] = command.inputNumber;
             }
         }
 
         // send ack
-        if (!cube.isBot && maxInputs[port] > prevMax) SendAck(cube.port);
+        if (!cube.isBot && maxInputs[id] > prevMax) SendAck(cube);
     }
 
-    private void SendAck(int port)
+    private void SendAck(CubeEntity cube)
     {
         var packet3 = Packet.Obtain();
         packet3.buffer.PutInt((int) Utils.Ports.ACK);
-        packet3.buffer.PutInt(maxInputs[port]);
+        packet3.buffer.PutInt(maxInputs[cube.id]);
         packet3.buffer.Flush();
-        Utils.Send(packet3, channel, port);
+        Utils.Send(packet3, channel, cube.port);
     }
 
     private void ReceiveJoins(Packet packet, bool isBot = false)
     {
         int id = packet.buffer.GetInt();
-        int port = Utils.GetPortFromId(id);
         
-        
-        var existingPlayer = portsUsed.Contains(port);
+        var existingPlayer = idsUsed.Contains(id);
         if (!existingPlayer)
         {
-            // if(keysOfCubesToDebug.Contains(port)) print($"client-{id} sent join");
             PlayerJoined(id, isBot);
-            portsUsed.Add(port);
-        }
-        else
-        {
-            // print($"Existing id (or diff id that would receive the same port) trying to join. Ignoring id {id}, port {port}");
+            idsUsed.Add(id);
         }
     }
     
@@ -142,12 +134,12 @@ public class SimulationServer : MonoBehaviour
             var cube = kv.Value;
             if(cube.isBot) continue;
 
-            packetNumbers[cube.port] = packetNumbers[cube.port] + 1;
+            packetNumbers[cube.id] = packetNumbers[cube.id] + 1;
             
             // serialize
             var packet = Packet.Obtain();
             packet.buffer.PutInt((int) Utils.Ports.DATA);
-            var snapshot = new Snapshot(cubeEntitiesServer, packetNumbers[cube.port]);
+            var snapshot = new Snapshot(cubeEntitiesServer, packetNumbers[cube.id]);
             snapshot.Serialize(packet.buffer);
             packet.buffer.Flush();
             Utils.Send(packet, channel, cube.port);
@@ -157,24 +149,26 @@ public class SimulationServer : MonoBehaviour
     private void PlayerJoined(int id, bool isBot = false)  // Server
     {
         // init new player
-        var cubeGO = Instantiate(serverCubePrefab, Utils.startPos, Quaternion.identity);
+        var cubeGO = Instantiate(serverCubePrefab, Utils.RandomStartPos(), Quaternion.identity);
+        
         var canvas = Instantiate(playerUICanvas, new Vector3(), Quaternion.identity);
         canvas.transform.SetParent(cubeGO.transform);
         canvas.transform.localPosition = new Vector3(0f, 2f, 0f);
         var text = canvas.GetComponentInChildren<Text>();
         if(text != null) text.text = $"{id}";
+        
         var newCube = new CubeEntity(cubeGO, id, isBot);
         cubeGO.name = $"server-{id}";
         cubeGO.transform.SetParent(GameObject.Find("Players(Server)").transform);
-        cubeEntitiesServer[newCube.port] = newCube;
+        cubeEntitiesServer[newCube.id] = newCube;
         if(isBot) {
             cubeGO.name = $"server-bot-{id}";
-            bots[newCube.port] = newCube; // store bots in another list to test applying movement to them
+            bots[newCube.id] = newCube; // store bots in another list to test applying movement to them
         }
         else
         {
-            packetNumbers[newCube.port] = 0;
-            maxInputs[newCube.port] = 0;
+            packetNumbers[newCube.id] = 0;
+            maxInputs[newCube.id] = 0;
         }
         
         foreach (var cube in cubeEntitiesServer.Values)
@@ -188,7 +182,7 @@ public class SimulationServer : MonoBehaviour
             print($"send to client-{cube.id} {cubeEntitiesServer.Count-1} friends");
             foreach (var sendCube in cubeEntitiesServer.Values)
             {
-                if(sendCube.port == cube.port) continue;  // dont send the player to himself
+                if(sendCube.id == cube.id) continue;  // dont send a player to himself
                 
                 print($"friend with id {sendCube.id}");
                 buffer.PutInt(sendCube.id);
@@ -229,36 +223,45 @@ public class SimulationServer : MonoBehaviour
         }
     }
     
-    public void TakeDamage(string cubeName, float damage)
+    public void TakeDamage(string cubeName, float damage, int shooterId)
     {
-        var matchingCube = cubeEntitiesServer.Values.FirstOrDefault(c => c.cubeGameObject.transform.name.Equals(cubeName));
-
+        var matchingCube = cubeEntitiesServer.Values.FirstOrDefault(c => c.GO.transform.name.Equals(cubeName));
         if (matchingCube != null)
         {
-            var target = matchingCube.cubeGameObject.GetComponent<Target>();
-            if (target != null)
+            if (matchingCube.TakeDamage(damage) <= 0f)
             {
-                if (target.TakeDamage(damage) <= 0f)
+                print($"cube {matchingCube.id} is now dead"); 
+                foreach (var kv in cubeEntitiesServer)
                 {
-                    foreach (var kv in cubeEntitiesServer)
-                    {
-                        var packet = Packet.Obtain();
-                        packet.buffer.PutInt((int) Utils.Ports.PLAYER_DIED);
-                        print($"sending dead port {matchingCube.port} to {kv.Value.port}"); // 
-                        packet.buffer.PutInt(matchingCube.port);
-                        packet.buffer.Flush();
-                        Utils.Send(packet, channel, kv.Value.port);
-                    }
-                
-                    // Destroy and remove from Dictionary
-                    Destroy(matchingCube.cubeGameObject);
-                    cubeEntitiesServer.Remove(matchingCube.port);
-                    print($"killed {cubeName}");
+                    var packet = Packet.Obtain();
+                    packet.buffer.PutInt((int) Utils.Ports.PLAYER_DIED);
+                    packet.buffer.PutInt(matchingCube.id);
+                    packet.buffer.Flush();
+                    Utils.Send(packet, channel, kv.Value.port);
                 }
+            
+                // Teleport and respawn
+                // give shooter a point
+                if (cubeEntitiesServer.ContainsKey(shooterId))
+                {
+                    var shooter = cubeEntitiesServer[shooterId];
+                    shooter.points += 1;
+                }
+                matchingCube.health = 100f; // restore health
+                matchingCube.GO.transform.position = Utils.waitRoomPos; // tp to wait room
+                print($"Killed {cubeName}. Respawining in 10 seconds");
+                StartCoroutine(RespawnPlayer(matchingCube));
             }
         }
     }
-    
+
+    private IEnumerator RespawnPlayer(CubeEntity cube)
+    {
+        yield return new WaitForSeconds(10);
+        print("Respawning player..");
+        cube.GO.transform.position = Utils.RandomStartPos();
+    }
+
     private void OnDestroy() {
         channel.Disconnect();
     }

@@ -599,7 +599,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  smoothSpeed: 0.125
+  smoothSpeed: 0.1
   offset: {x: 0, y: 5, z: -12}
 --- !u!1 &1341572676
 GameObject:
@@ -806,6 +806,8 @@ MonoBehaviour:
   clientCubePrefab: {fileID: 5732492077391170865, guid: 1311777dcb5f1154a84cbc455218c953,
     type: 3}
   clientReconciliateCubePrefab: {fileID: 220534595683379430, guid: de430e5b95a37294189396c2dd01131b,
+    type: 3}
+  playerUICanvas: {fileID: 4352899645653780564, guid: 3e363928103a1c4409a45ec252c806df,
     type: 3}
 --- !u!4 &1739382822
 Transform:

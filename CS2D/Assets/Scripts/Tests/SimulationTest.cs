@@ -24,19 +24,19 @@ public class SimulationTest : MonoBehaviour
         
         TODO: el bot queda en el aire, parece que nadie lo actualiza
         
-        TODO: puedo mover al client, pero cuando miro la scene el client es un player y el primer player que se une al server es mi objeto client-{clientId} y reconciliate-{clientId}.
-        todo Capaz reconciliate esta unido al equivocado
-        
-        TODO te swappea con el primer player(le pone el nombre client-{clientId})! por eso la camara lo sigue a el y no a vos. Vos controlas al otro (originalmente vos) porque tenes una referencia al cubeEntity
-        todo soy el 2do y me considera un player (no client) porque me interpola y no me sigue la camara, pero si me toma los inputs
-        
-        todo sin reconciliate, solo interpolacion: interpola el ultimo player con los movimientos del client (pos y rot). El client solo se mueve (pos).
-        todo que deberia pasar? que el ultimo player no se mueva (porque no es su input) y el client tampoco (porque no debe interpolar)
-        todo que sea el ultimo player y no el 1ro debe tener que ver con que no habia ningun player conectado esta vez (las anteriores estaba el 1ro y otros conectados)
-        
-        todo mañana hacer step into a ver si spawnea en 0,3,0 y al toque se tpea al 1er player
-        
-        todo ver ultimo inputNumber recibido en client y si el snapshot esta aplicando el movimiento al cubo correcto
+        todo: 
+            lag, 
+            Poner cooldown al tiro. Mostrar puntos y vida en client con GUI,
+            (porahi) hacer mas confiable el paquete de tiro? no se capaz quiere que tenga confirmacion y retries,
+            que el follow de la camara sea mas smooth, 
+            
+            sonido de bala y muerte, 
+            efecto de disparo, 
+            efecto de daño (ese coloreo rojo con lerp y timer seria ideal), 
+            key para salto y plataformas, 
+            mejor modelo de tanque
+
+            en cliente modificar ip con input text, todo: hecho pero guarda porque para hacerlo bien deberias saber el ip de cada client (pensa que el Utils.Send lo usan tanto client como server)
     */
     
 }
