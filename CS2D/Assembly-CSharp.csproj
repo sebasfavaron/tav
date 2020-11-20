@@ -56,48 +56,31 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Gun.cs" />
-     <Compile Include="Assets\Scripts\Client.cs" />
-     <Compile Include="Assets\Scripts\Client\PlayerController.cs" />
-     <Compile Include="Assets\Scripts\Client\PlayerNetworkView.cs" />
-     <Compile Include="Assets\Scripts\Game Messages\AckReliableMessage.cs" />
-     <Compile Include="Assets\Scripts\Game Messages\AckReliableSendEveryFrameMessage.cs" />
-     <Compile Include="Assets\Scripts\Game Messages\ConnectPlayerMessage.cs" />
-     <Compile Include="Assets\Scripts\Game Messages\PlayerConnectedMessage.cs" />
-     <Compile Include="Assets\Scripts\Game Messages\PlayerDisconnectedMessage.cs" />
-     <Compile Include="Assets\Scripts\GameMessage.cs" />
      <Compile Include="Assets\Scripts\Network\BitBuffer.cs" />
      <Compile Include="Assets\Scripts\Network\Channel.cs" />
-     <Compile Include="Assets\Scripts\Network\CommunicationManager.cs" />
      <Compile Include="Assets\Scripts\Network\Packet.cs" />
      <Compile Include="Assets\Scripts\Network\Sequence.cs" />
-     <Compile Include="Assets\Scripts\PlayerInput.cs" />
-     <Compile Include="Assets\Scripts\Server.cs" />
-     <Compile Include="Assets\Scripts\Server\GameData.cs" />
-     <Compile Include="Assets\Scripts\Server\Player.cs" />
-     <Compile Include="Assets\Scripts\Server\PlayerData.cs" />
+     <Compile Include="Assets\Scripts\ObjectTypes\GameObjectPool.cs" />
+     <Compile Include="Assets\Scripts\ObjectTypes\GenericPool.cs" />
+     <Compile Include="Assets\Scripts\ObjectTypes\GenericPoolableObject.cs" />
+     <Compile Include="Assets\Scripts\ObjectTypes\PoolableGameObject.cs" />
+     <Compile Include="Assets\Scripts\ObjectTypes\PoolObject.cs" />
+     <Compile Include="Assets\Scripts\ObjectTypes\Singleton.cs" />
      <Compile Include="Assets\Scripts\Tests\CameraFollow.cs" />
+     <Compile Include="Assets\Scripts\Tests\Client.cs" />
      <Compile Include="Assets\Scripts\Tests\Commands.cs" />
      <Compile Include="Assets\Scripts\Tests\ConnectionTest.cs" />
      <Compile Include="Assets\Scripts\Tests\CubeEntity.cs" />
      <Compile Include="Assets\Scripts\Tests\FakeChannel.cs" />
      <Compile Include="Assets\Scripts\Tests\GameManager.cs" />
      <Compile Include="Assets\Scripts\Tests\HitPackage.cs" />
-     <Compile Include="Assets\Scripts\Tests\LoadScenes.cs" />
-     <Compile Include="Assets\Scripts\Tests\MyLogHandler.cs" />
-     <Compile Include="Assets\Scripts\Tests\SimulationClient.cs" />
-     <Compile Include="Assets\Scripts\Tests\SimulationServer.cs" />
+     <Compile Include="Assets\Scripts\Tests\Server.cs" />
      <Compile Include="Assets\Scripts\Tests\SimulationTest.cs" />
      <Compile Include="Assets\Scripts\Tests\Snapshot.cs" />
      <Compile Include="Assets\Scripts\Tests\Target.cs" />
-     <Compile Include="Assets\Scripts\Tests\Utils.cs" />
-     <Compile Include="Assets\Scripts\Utils\GameObjectPool.cs" />
-     <Compile Include="Assets\Scripts\Utils\GenericPool.cs" />
-     <Compile Include="Assets\Scripts\Utils\GenericPoolableObject.cs" />
+     <Compile Include="Assets\Scripts\Utils\LoadScenes.cs" />
      <Compile Include="Assets\Scripts\Utils\NumberUtils.cs" />
-     <Compile Include="Assets\Scripts\Utils\PoolableGameObject.cs" />
-     <Compile Include="Assets\Scripts\Utils\PoolObject.cs" />
-     <Compile Include="Assets\Scripts\Utils\Singleton.cs" />
+     <Compile Include="Assets\Scripts\Utils\Utils.cs" />
  <Reference Include="Unity.Timeline.Editor">
  <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
  </Reference>

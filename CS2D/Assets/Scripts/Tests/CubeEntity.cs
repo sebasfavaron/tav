@@ -115,7 +115,7 @@ public class CubeEntity
         var ray = new Ray(originRay, _transform.forward);
         if (Physics.Raycast(ray, out hit, gunRange))
         {
-            return new HitPackage(hit.transform.name, port, gunDamage);
+            return new HitPackage(hit.transform.name, gunDamage);
         }
 
         return null;

@@ -6,21 +6,7 @@
     <e p="D:\itba\tav (tecnicas avanzadas de videojuegos)\tav (sebas)\CS2D" t="IncludeRecursive">
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
-        <e p="Gun.cs" t="Include" />
         <e p="Scripts" t="Include">
-          <e p="Client" t="Include">
-            <e p="PlayerController.cs" t="Include" />
-            <e p="PlayerNetworkView.cs" t="Include" />
-          </e>
-          <e p="Client.cs" t="Include" />
-          <e p="Game Messages" t="Include">
-            <e p="AckReliableMessage.cs" t="Include" />
-            <e p="AckReliableSendEveryFrameMessage.cs" t="Include" />
-            <e p="ConnectPlayerMessage.cs" t="Include" />
-            <e p="PlayerConnectedMessage.cs" t="Include" />
-            <e p="PlayerDisconnectedMessage.cs" t="Include" />
-          </e>
-          <e p="GameMessage.cs" t="Include" />
           <e p="IngameDebugConsole" t="Include">
             <e p="Android" t="Include">
               <e p="DebugLogLogcatListener.cs" t="Include" />
@@ -46,42 +32,35 @@
           <e p="Network" t="Include">
             <e p="BitBuffer.cs" t="Include" />
             <e p="Channel.cs" t="Include" />
-            <e p="CommunicationManager.cs" t="Include" />
             <e p="Packet.cs" t="Include" />
             <e p="Sequence.cs" t="Include" />
           </e>
-          <e p="PlayerInput.cs" t="Include" />
-          <e p="Server" t="Include">
-            <e p="GameData.cs" t="Include" />
-            <e p="Player.cs" t="Include" />
-            <e p="PlayerData.cs" t="Include" />
+          <e p="ObjectTypes" t="Include">
+            <e p="GameObjectPool.cs" t="Include" />
+            <e p="GenericPool.cs" t="Include" />
+            <e p="GenericPoolableObject.cs" t="Include" />
+            <e p="PoolableGameObject.cs" t="Include" />
+            <e p="PoolObject.cs" t="Include" />
+            <e p="Singleton.cs" t="Include" />
           </e>
-          <e p="Server.cs" t="Include" />
           <e p="Tests" t="Include">
             <e p="CameraFollow.cs" t="Include" />
+            <e p="Client.cs" t="Include" />
             <e p="Commands.cs" t="Include" />
             <e p="ConnectionTest.cs" t="Include" />
             <e p="CubeEntity.cs" t="Include" />
             <e p="FakeChannel.cs" t="Include" />
             <e p="GameManager.cs" t="Include" />
             <e p="HitPackage.cs" t="Include" />
-            <e p="LoadScenes.cs" t="Include" />
-            <e p="MyLogHandler.cs" t="Include" />
-            <e p="SimulationClient.cs" t="Include" />
-            <e p="SimulationServer.cs" t="Include" />
+            <e p="Server.cs" t="Include" />
             <e p="SimulationTest.cs" t="Include" />
             <e p="Snapshot.cs" t="Include" />
             <e p="Target.cs" t="Include" />
-            <e p="Utils.cs" t="Include" />
           </e>
           <e p="Utils" t="Include">
-            <e p="GameObjectPool.cs" t="Include" />
-            <e p="GenericPool.cs" t="Include" />
-            <e p="GenericPoolableObject.cs" t="Include" />
+            <e p="LoadScenes.cs" t="Include" />
             <e p="NumberUtils.cs" t="Include" />
-            <e p="PoolableGameObject.cs" t="Include" />
-            <e p="PoolObject.cs" t="Include" />
-            <e p="Singleton.cs" t="Include" />
+            <e p="Utils.cs" t="Include" />
           </e>
         </e>
       </e>
