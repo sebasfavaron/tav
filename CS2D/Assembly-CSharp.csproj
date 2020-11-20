@@ -78,6 +78,7 @@
      <Compile Include="Assets\Scripts\Tests\SimulationTest.cs" />
      <Compile Include="Assets\Scripts\Tests\Snapshot.cs" />
      <Compile Include="Assets\Scripts\Tests\Target.cs" />
+     <Compile Include="Assets\Scripts\Utils\Cooldown.cs" />
      <Compile Include="Assets\Scripts\Utils\LoadScenes.cs" />
      <Compile Include="Assets\Scripts\Utils\NumberUtils.cs" />
      <Compile Include="Assets\Scripts\Utils\Utils.cs" />

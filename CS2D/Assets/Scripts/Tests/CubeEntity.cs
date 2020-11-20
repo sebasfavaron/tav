@@ -5,30 +5,31 @@ using UnityEngine;
 
 public class CubeEntity
 {
-
-    public bool isBot;
-    public int id;
+    // Serialized fields
     public Vector3 position;
     public Quaternion rotation;
-    public GameObject GO;
-    
-    public float health = 50f;
-    public float gunRange = 100f;
-    public float gunDamage = 5f;
+    public float health = 100f;
     
     // Connection info
     public int port;
-    public int maxInputReceived;
     public int points;
 
+    // Extra
+    public GameObject GO;
+    public bool isBot;
+    public int id;
+    public float gunRange = 100f;
+    public float gunDamage = 50f;
+    private Cooldown shootingCooldown;
+    
     public CubeEntity(GameObject go, int id, bool isBot = false)
     {
         GO = go;
         this.id = id;
         port = Utils.GetPortFromId(id);
-        maxInputReceived = -1;
         this.isBot = isBot;
         points = 0;
+        shootingCooldown = new Cooldown(1f, true);
     }
 
     public CubeEntity(Vector3 position, Quaternion rotation, GameObject go)
@@ -38,9 +39,9 @@ public class CubeEntity
         GO = go;
         id = -1;
         port = -1;
-        maxInputReceived = -1;
         isBot = false;
         points = 0;
+        shootingCooldown = new Cooldown(1f, true);
     }
     
     public CubeEntity(CubeEntity original)
@@ -50,15 +51,14 @@ public class CubeEntity
         position = new Vector3(original.position.x, original.position.y, original.position.z);
         rotation = new Quaternion(original.rotation.x, original.rotation.y, original.rotation.z, original.rotation.w);
         port = original.port;
-        maxInputReceived = original.maxInputReceived;
         points = original.points;
+        shootingCooldown = original.shootingCooldown;
     }
 
     public void Serialize(BitBuffer buffer)
     {
         var position = GO.transform.position;
         var rotation = GO.transform.rotation;
-        buffer.PutInt(maxInputReceived);
         buffer.PutFloat(position.x);
         buffer.PutFloat(position.y);
         buffer.PutFloat(position.z);
@@ -72,7 +72,6 @@ public class CubeEntity
     public void Deserialize(BitBuffer buffer) {
         position = new Vector3();
         rotation = new Quaternion();
-        maxInputReceived = buffer.GetInt();
         position.x = buffer.GetFloat();
         position.y = buffer.GetFloat();
         position.z = buffer.GetFloat();
@@ -97,7 +96,6 @@ public class CubeEntity
             z = previous.rotation.z + deltaRot.z
         };
         cubeEntity.rotation = rot;
-        cubeEntity.maxInputReceived = Mathf.Max(previous.maxInputReceived, next.maxInputReceived);
         return cubeEntity;
     }
 
@@ -109,16 +107,25 @@ public class CubeEntity
     
     public HitPackage Shoot()
     {
+        if (!shootingCooldown.IsOver()) return null;  // TODO: aca podria indicarle al usuario que no puede disparar todavia (o mostrar en la UI el remaining cooldown)
+        shootingCooldown.RestartCooldown();
+
         RaycastHit hit;
         var _transform = GO.transform;
         Vector3 originRay = _transform.position + _transform.forward * 0.6f;
         var ray = new Ray(originRay, _transform.forward);
         if (Physics.Raycast(ray, out hit, gunRange))
         {
+            Debug.Log($"shot {hit.transform.name}");
             return new HitPackage(hit.transform.name, gunDamage);
         }
 
         return null;
+    }
+
+    public void UpdateShootingCooldown()
+    {
+        shootingCooldown.UpdateCooldown();
     }
     
     public float TakeDamage(float amount)

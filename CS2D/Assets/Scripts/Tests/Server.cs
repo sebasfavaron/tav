@@ -88,7 +88,7 @@ public class Server : MonoBehaviour
                 
                 if (!command.hitPackage.hitName.Equals(""))
                 {
-                    print($"{cube.id} hit {command.hitPackage.hitName}");
+                    print($"{cube.id} hit {command.hitPackage.hitName} and did {command.hitPackage.damage} damage");
                     TakeDamage(command.hitPackage.hitName, command.hitPackage.damage, cube.id);
                 }
 
@@ -148,18 +148,18 @@ public class Server : MonoBehaviour
         // init new player
         var cubeGO = Instantiate(serverCubePrefab, Utils.RandomStartPos(), Quaternion.identity);
         
+        // Attach label on top of his head
         var canvas = Instantiate(playerUICanvas, new Vector3(), Quaternion.identity);
         canvas.transform.SetParent(cubeGO.transform);
         canvas.transform.localPosition = new Vector3(0f, 2f, 0f);
         var text = canvas.GetComponentInChildren<Text>();
         if(text != null) text.text = $"{id}";
         
-        var newCube = new CubeEntity(cubeGO, id, isBot);
-        cubeGO.name = $"server-{id}";
         cubeGO.transform.SetParent(GameObject.Find("Players(Server)").transform);
+        cubeGO.name = $"player-{id}";
+        var newCube = new CubeEntity(cubeGO, id, isBot);
         cubeEntitiesServer[newCube.id] = newCube;
         if(isBot) {
-            cubeGO.name = $"server-bot-{id}";
             bots[newCube.id] = newCube; // store bots in another list to test applying movement to them
         }
         else
@@ -167,26 +167,27 @@ public class Server : MonoBehaviour
             packetNumbers[newCube.id] = 0;
             maxInputs[newCube.id] = 0;
         }
+        print($"{cubeGO.name} joined");
         
         foreach (var cube in cubeEntitiesServer.Values)
         {
+            if(cube.isBot) continue;
+            
             // send player joined packet to everyone (including to the new player as a confirmation)
             Packet playerJoinedPacket = Packet.Obtain();
             var buffer = playerJoinedPacket.buffer;
             buffer.PutInt((int) Utils.Ports.PLAYER_JOINED);
             buffer.PutInt(id);
             buffer.PutInt(cubeEntitiesServer.Count-1);
-            print($"send to client-{cube.id} {cubeEntitiesServer.Count-1} friends");
             foreach (var sendCube in cubeEntitiesServer.Values)
             {
                 if(sendCube.id == cube.id) continue;  // dont send a player to himself
                 
-                print($"friend with id {sendCube.id}");
                 buffer.PutInt(sendCube.id);
                 sendCube.Serialize(buffer);
             }
             buffer.Flush();
-            if(!cube.isBot) Utils.Send(playerJoinedPacket, channel, cube.port);
+            Utils.Send(playerJoinedPacket, channel, cube.port);
         }
     }
 
@@ -230,7 +231,8 @@ public class Server : MonoBehaviour
         var matchingCube = cubeEntitiesServer.Values.FirstOrDefault(c => c.GO.transform.name.Equals(cubeName));
         if (matchingCube != null)
         {
-            if (matchingCube.TakeDamage(damage) <= 0f)
+            float health = matchingCube.TakeDamage(damage);
+            if (health <= 0f)
             {
                 print($"cube {matchingCube.id} is now dead"); 
                 foreach (var kv in cubeEntitiesServer)
@@ -249,6 +251,10 @@ public class Server : MonoBehaviour
                 print($"Killed {cubeName}. Respawining in 10 seconds");
                 StartCoroutine(RespawnPlayer(matchingCube));
             }
+        }
+        else
+        {
+            print("no match");
         }
     }
 

@@ -48,6 +48,11 @@ public class Client : MonoBehaviour
 
     private void FixedUpdate()
     {
+        foreach (var cube in cubeEntitiesClient.Values)
+        {
+            cube.UpdateShootingCooldown();
+        }
+        
         ReadStoreApplySendInput();
         InterpolateAndReconciliate();
     }
@@ -285,34 +290,34 @@ public class Client : MonoBehaviour
     private void PlayerJoined(Packet packet)
     {
         var receivedId = packet.buffer.GetInt();
+        if (cubeEntitiesClient.ContainsKey(receivedId)) return; // Skip anyone you already added
         
+        var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
+        cubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
+    
+        // Attach label on top of his head
+        AddLabelToCube(cubeGO, receivedId);
+
+        var cube = new CubeEntity(cubeGO, receivedId);
+        cubeEntitiesClient[cube.id] = cube;
+
         // Check if player joined is this client (server confirmation that I'm joined)
-        if (!connected && (receivedId == clientId))
+        if (receivedId == clientId)
         {
             // Add myself
-            var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
-            var canvas = Instantiate(playerUICanvas, new Vector3(), Quaternion.identity);
-            canvas.transform.SetParent(cubeGO.transform);
-            canvas.transform.localPosition = new Vector3(0f, 2f, 0f);
-            var text = canvas.GetComponentInChildren<Text>();
-            if(text != null) text.text = $"{receivedId}";
-            
             cubeGO.name = $"client-{clientId}";
             print($"I joined, I'm {cubeGO.name}");
-            clientCube = new CubeEntity(cubeGO, receivedId);
             clientCharacterController = cubeGO.GetComponent<CharacterController>();
-            cubeEntitiesClient[clientCube.id] = clientCube;
+            clientCube = cube;
             GameManager.clientId = clientId;
 
+            // Add my reconciliation clone
             var reconciliateGO = Instantiate(clientReconciliateCubePrefab, Utils.startPos, Quaternion.identity);
             reconciliateGO.name = $"reconciliate-{clientId}";
             reconciliateClientCube = new CubeEntity(reconciliateGO, clientId);
             reconciliateCharacterController = reconciliateGO.GetComponent<CharacterController>();
-            // reconciliateCharacterController.transform.GetChild(1).gameObject.active = false;
-            // reconciliateCharacterController.transform.GetChild(0).gameObject.active = false;
             
-            
-            // Now add all previously connected players
+            // Now add all players already in-game
             int previousCubesAmount = packet.buffer.GetInt();
             print($"client-{clientId} receiving join with {previousCubesAmount} players");
             for (int i = 0; i < previousCubesAmount; i++)
@@ -321,11 +326,7 @@ public class Client : MonoBehaviour
                 if (!cubeEntitiesClient.ContainsKey(newCubeId))
                 {
                     var newCubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
-                    canvas = Instantiate(playerUICanvas, new Vector3(), Quaternion.identity);
-                    canvas.transform.SetParent(newCubeGO.transform);
-                    canvas.transform.localPosition = new Vector3(0f, 2f, 0f);
-                    text = canvas.GetComponentInChildren<Text>();
-                    if(text != null) text.text = $"{newCubeId}";
+                    AddLabelToCube(newCubeGO, newCubeId);
                     
                     newCubeGO.name = $"player-{newCubeId}";
                     print($"adding {newCubeGO.name}");
@@ -342,21 +343,20 @@ public class Client : MonoBehaviour
         else
         {
             // If new player is not the client
-            var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
-            var canvas = Instantiate(playerUICanvas, new Vector3(), Quaternion.identity);
-            canvas.transform.SetParent(cubeGO.transform);
-            canvas.transform.localPosition = new Vector3(0f, 2f, 0f);
-            var text = canvas.GetComponentInChildren<Text>();
-            if(text != null) text.text = $"{receivedId}";
-            
             cubeGO.name = $"player-{receivedId}";
             print($"{cubeGO.name} joined");
-            cubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
-            var cube = new CubeEntity(cubeGO, receivedId);
-            cubeEntitiesClient[cube.id] = cube;
         }
     }
-    
+
+    private void AddLabelToCube(GameObject cubeGO, int cubeId)
+    {
+        var canvas = Instantiate(playerUICanvas, new Vector3(), Quaternion.identity);
+        canvas.transform.SetParent(cubeGO.transform);
+        canvas.transform.localPosition = new Vector3(0f, 2f, 0f);
+        var text = canvas.GetComponentInChildren<Text>();
+        if(text != null) text.text = $"{cubeId}";
+    }
+
     private void PlayerDied(Packet packet)
     {
         var receivedId = packet.buffer.GetInt();
