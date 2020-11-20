@@ -34,6 +34,7 @@ public class Client : MonoBehaviour
     private CharacterController clientCharacterController = null;
     private CubeEntity reconciliateClientCube;
     private CharacterController reconciliateCharacterController;
+    private int msFakeLag;
 
     // Start is called before the first frame update
     public void Start()
@@ -197,6 +198,30 @@ public class Client : MonoBehaviour
         commands.Add(command);
         inputNumber++;
 
+        // Local commands (we dont send these to the server)
+        if(Input.GetKey(KeyCode.Keypad0))
+        {
+            msFakeLag = 0;
+        } else if(Input.GetKey(KeyCode.Keypad1))
+        {
+            msFakeLag = 100;
+        } else if(Input.GetKey(KeyCode.Keypad2))
+        {
+            msFakeLag = 200;
+        } else if(Input.GetKey(KeyCode.Keypad3))
+        {
+            msFakeLag = 300;
+        } else if(Input.GetKey(KeyCode.Keypad4))
+        {
+            msFakeLag = 500;
+        } else if(Input.GetKey(KeyCode.Keypad5))
+        {
+            msFakeLag = 1000;
+        } else if(Input.GetKey(KeyCode.Keypad6))
+        {
+            msFakeLag = 1500;
+        }
+        
         return command;
     }
 
@@ -226,8 +251,24 @@ public class Client : MonoBehaviour
             }
             packet.buffer.Flush();
 
-            if (connected && clientCube.id >= 0) Utils.Send(packet, channel, Utils.serverPort);
+            if (connected && clientCube.id >= 0)
+            {
+                if (msFakeLag > 0)
+                {
+                    StartCoroutine(DelayedInputSend(packet));
+                }
+                else
+                {
+                    Utils.Send(packet, channel, Utils.serverPort);
+                }
+            }
         }
+    }
+
+    private IEnumerator DelayedInputSend(Packet packet)
+    {
+        yield return new WaitForSecondsRealtime(msFakeLag/1000f);
+        Utils.Send(packet, channel, Utils.serverPort);
     }
 
     private void Join()

@@ -25,11 +25,11 @@ public class SimulationTest : MonoBehaviour
         TODO: el bot queda en el aire, parece que nadie lo actualiza
         
         todo:
-            lag, 
+            lag,
             Poner cooldown al tiro. Mostrar puntos y vida en client con GUI,
-            que el follow de la camara sea mas smooth, 
+            que el follow de la camara sea mas smooth,
             
-            sonido de bala y muerte, 
+            sonido de bala y muerte,
             efecto de disparo, 
             efecto de daño (ese coloreo rojo con lerp y timer seria ideal), 
             key para salto y plataformas, 
