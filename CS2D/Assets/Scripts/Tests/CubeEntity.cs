@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 public class CubeEntity
 {
@@ -11,8 +12,7 @@ public class CubeEntity
     public Vector3 position;
     public Quaternion rotation;
     public float health = 100f;
-    public UIManager uiManager;
-    
+
     // Connection info
     public int port;
     public int points;
@@ -24,7 +24,9 @@ public class CubeEntity
     public float gunRange = 100f;
     public float gunDamage = 10f;
     private Cooldown shootingCooldown;
-    
+    public UIManager uiManager;
+    public GameObject laser;
+        
     public CubeEntity(GameObject go, int id, bool isBot = false)
     {
         GO = go;
@@ -65,6 +67,11 @@ public class CubeEntity
     {
         this.uiManager = uiManager;
         this.uiManager.SetUI(name, health);
+    }
+
+    public void SetLaserPrefab(GameObject laser)
+    {
+        this.laser = laser;
     }
 
     public void Serialize(BitBuffer buffer)
@@ -132,6 +139,7 @@ public class CubeEntity
         var _transform = GO.transform;
         Vector3 originRay = _transform.position + _transform.forward * 0.6f;
         var ray = new Ray(originRay, _transform.forward);
+        if(laser != null) Object.Instantiate(laser, originRay, _transform.rotation);
         if (Physics.Raycast(ray, out hit, gunRange))
         {
             Debug.Log($"shot {hit.transform.name}");

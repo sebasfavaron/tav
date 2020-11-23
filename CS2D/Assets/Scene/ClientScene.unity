@@ -1065,6 +1065,8 @@ MonoBehaviour:
     type: 3}
   playerUICanvas: {fileID: 4352899645653780564, guid: 3e363928103a1c4409a45ec252c806df,
     type: 3}
+  laserPrefab: {fileID: 5839289340545504330, guid: be1daa597866a894fa1a18231c89d8d8,
+    type: 3}
 --- !u!4 &1739382822
 Transform:
   m_ObjectHideFlags: 0

@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\GeneralUIManager.cs" />
+     <Compile Include="Assets\laserScript.cs" />
      <Compile Include="Assets\Scripts\Network\BitBuffer.cs" />
      <Compile Include="Assets\Scripts\Network\Channel.cs" />
      <Compile Include="Assets\Scripts\Network\Packet.cs" />

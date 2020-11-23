@@ -4,6 +4,7 @@ ScriptsOnlyBuild:
     - CameraFollow
     - Client
     - GameManager
+    - GeneralUIManager
     - HealthBar
     - LoadScenes
     - Server
@@ -15,6 +16,8 @@ ScriptsOnlyBuild:
     - IngameDebugConsole.DebugLogRecycledListView
     - IngameDebugConsole.DebugLogResizeListener
     - IngameDebugConsole.DebugsOnScrollListener
+    Unity.Rider.Editor.dll:
+    - Packages.Rider.Editor.RiderScriptEditorData
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
     - UnityEditor.TestTools.TestRunner.TestListCacheData
@@ -69,25 +72,27 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9682}
     - Class: 114
-      Script: {instanceID: 9862}
+      Script: {instanceID: 9730}
     - Class: 114
-      Script: {instanceID: 9912}
+      Script: {instanceID: 9798}
     - Class: 114
-      Script: {instanceID: 10340}
+      Script: {instanceID: 9864}
     - Class: 114
-      Script: {instanceID: 10470}
+      Script: {instanceID: 9914}
     - Class: 114
-      Script: {instanceID: 10630}
+      Script: {instanceID: 10342}
     - Class: 114
-      Script: {instanceID: 11338}
+      Script: {instanceID: 10472}
     - Class: 114
-      Script: {instanceID: 11736}
+      Script: {instanceID: 10632}
     - Class: 114
-      Script: {instanceID: 11772}
+      Script: {instanceID: 11296}
     - Class: 114
-      Script: {instanceID: 13910}
+      Script: {instanceID: 11342}
     - Class: 114
-      Script: {instanceID: 37508}
+      Script: {instanceID: 11740}
+    - Class: 114
+      Script: {instanceID: 11776}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -97,6 +102,10 @@ ScriptsOnlyBuild:
     - Class: 143
       Script: {instanceID: 0}
     - Class: 157
+      Script: {instanceID: 0}
+    - Class: 198
+      Script: {instanceID: 0}
+    - Class: 199
       Script: {instanceID: 0}
     - Class: 213
       Script: {instanceID: 0}
@@ -138,23 +147,23 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9682}
     - Class: 114
-      Script: {instanceID: 9862}
+      Script: {instanceID: 9730}
     - Class: 114
-      Script: {instanceID: 9912}
+      Script: {instanceID: 9864}
     - Class: 114
-      Script: {instanceID: 10340}
+      Script: {instanceID: 9914}
     - Class: 114
-      Script: {instanceID: 11338}
+      Script: {instanceID: 10342}
     - Class: 114
-      Script: {instanceID: 11472}
+      Script: {instanceID: 11296}
     - Class: 114
-      Script: {instanceID: 11736}
+      Script: {instanceID: 11342}
     - Class: 114
-      Script: {instanceID: 11772}
+      Script: {instanceID: 11476}
     - Class: 114
-      Script: {instanceID: 13910}
+      Script: {instanceID: 11740}
     - Class: 114
-      Script: {instanceID: 37508}
+      Script: {instanceID: 11776}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -203,69 +212,69 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9682}
     - Class: 114
-      Script: {instanceID: 9862}
-    - Class: 114
       Script: {instanceID: 9864}
     - Class: 114
-      Script: {instanceID: 9912}
+      Script: {instanceID: 9866}
     - Class: 114
-      Script: {instanceID: 10044}
+      Script: {instanceID: 9914}
     - Class: 114
-      Script: {instanceID: 10132}
+      Script: {instanceID: 10046}
     - Class: 114
-      Script: {instanceID: 10340}
+      Script: {instanceID: 10134}
     - Class: 114
-      Script: {instanceID: 10416}
+      Script: {instanceID: 10342}
     - Class: 114
-      Script: {instanceID: 10472}
+      Script: {instanceID: 10418}
     - Class: 114
-      Script: {instanceID: 10538}
+      Script: {instanceID: 10474}
     - Class: 114
-      Script: {instanceID: 10624}
+      Script: {instanceID: 10540}
     - Class: 114
-      Script: {instanceID: 10672}
+      Script: {instanceID: 10626}
     - Class: 114
-      Script: {instanceID: 10778}
+      Script: {instanceID: 10674}
     - Class: 114
-      Script: {instanceID: 10858}
+      Script: {instanceID: 10780}
     - Class: 114
-      Script: {instanceID: 10886}
+      Script: {instanceID: 10860}
     - Class: 114
-      Script: {instanceID: 11006}
+      Script: {instanceID: 10888}
     - Class: 114
-      Script: {instanceID: 11034}
+      Script: {instanceID: 11008}
     - Class: 114
-      Script: {instanceID: 11156}
+      Script: {instanceID: 11036}
     - Class: 114
-      Script: {instanceID: 11256}
+      Script: {instanceID: 11158}
     - Class: 114
-      Script: {instanceID: 11338}
+      Script: {instanceID: 11258}
     - Class: 114
-      Script: {instanceID: 11556}
+      Script: {instanceID: 11342}
     - Class: 114
-      Script: {instanceID: 11666}
+      Script: {instanceID: 11560}
     - Class: 114
-      Script: {instanceID: 11698}
+      Script: {instanceID: 11670}
     - Class: 114
-      Script: {instanceID: 11736}
+      Script: {instanceID: 11702}
     - Class: 114
-      Script: {instanceID: 11772}
+      Script: {instanceID: 11740}
     - Class: 114
-      Script: {instanceID: 17782}
+      Script: {instanceID: 11776}
     - Class: 114
-      Script: {instanceID: 17786}
+      Script: {instanceID: 15302}
     - Class: 114
-      Script: {instanceID: 17802}
+      Script: {instanceID: 15312}
     - Class: 114
-      Script: {instanceID: 17808}
+      Script: {instanceID: 15368}
     - Class: 114
-      Script: {instanceID: 17812}
+      Script: {instanceID: 15372}
     - Class: 114
-      Script: {instanceID: 17816}
+      Script: {instanceID: 15376}
     - Class: 114
-      Script: {instanceID: 17832}
+      Script: {instanceID: 15380}
     - Class: 114
-      Script: {instanceID: 17974}
+      Script: {instanceID: 15384}
+    - Class: 114
+      Script: {instanceID: 15518}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -311,6 +320,12 @@ ScriptsOnlyBuild:
     className: AudioPlayableAsset
   - hash:
       serializedVersion: 2
+      Hash: 890895da721fcae149fb8910f6a54954
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: HealthBar
+  - hash:
+      serializedVersion: 2
       Hash: 626925ef558787b2d85c809198164d19
     assemblyName: Unity.TextMeshPro.dll
     namespaceName: TMPro
@@ -327,6 +342,12 @@ ScriptsOnlyBuild:
     assemblyName: Cinemachine.dll
     namespaceName: Cinemachine
     className: CinemachineFixedSignal
+  - hash:
+      serializedVersion: 2
+      Hash: e813c40504fa91d2a2c6050123a45c27
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: GeneralUIManager
   - hash:
       serializedVersion: 2
       Hash: e7a73f5f78ba6445195ec23b74a1ce2d
@@ -653,7 +674,7 @@ ScriptsOnlyBuild:
     className: DebugLogRecycledListView
   - hash:
       serializedVersion: 2
-      Hash: 46d06766d10e185d21730b23c8dbfe2f
+      Hash: 2a5429d42dca1a3418a18608cf828d3b
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Client
@@ -899,6 +920,12 @@ ScriptsOnlyBuild:
     className: CinemachineVolumeSettings
   - hash:
       serializedVersion: 2
+      Hash: 31e06ca1e68b4d21ac579bb2ccf54ac4
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: UIManager
+  - hash:
+      serializedVersion: 2
       Hash: f336e086360abe49a3323e5f1583c35a
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
@@ -1095,18 +1122,6 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: PlayableTrack
-  - hash:
-      serializedVersion: 2
-      Hash: 890895da721fcae149fb8910f6a54954
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: HealthBar
-  - hash:
-      serializedVersion: 2
-      Hash: 31e06ca1e68b4d21ac579bb2ccf54ac4
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: UIManager
   platform: 19
   scenePathNames:
   - Assets/Scene/StartMenu.unity

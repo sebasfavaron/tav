@@ -24,6 +24,7 @@ public class Client : MonoBehaviour
     [SerializeField] private GameObject clientCubePrefab;
     [SerializeField] private GameObject clientReconciliateCubePrefab;
     [SerializeField] private GameObject playerUICanvas;
+    [SerializeField] private GameObject laserPrefab;
     private GeneralUIManager UICanvas;
     private Dictionary<int, CubeEntity> cubeEntitiesClient;
 
@@ -296,6 +297,7 @@ public class Client : MonoBehaviour
         cubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
         
         var cube = new CubeEntity(cubeGO, receivedId);
+        cube.SetLaserPrefab(laserPrefab);
         cubeEntitiesClient[cube.id] = cube;
 
         // Attach label on top of his head
@@ -332,6 +334,7 @@ public class Client : MonoBehaviour
 
                     var newCube = new CubeEntity(newCubeGO, newCubeId);
                     newCube.Deserialize(packet.buffer);
+                    newCube.SetLaserPrefab(laserPrefab);
                     cubeEntitiesClient[newCubeId] = newCube;
 
                     AddUIToCube(newCube, newCubeId);
