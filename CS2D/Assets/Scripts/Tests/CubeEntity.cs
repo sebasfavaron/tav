@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CubeEntity
 {
@@ -9,6 +11,7 @@ public class CubeEntity
     public Vector3 position;
     public Quaternion rotation;
     public float health = 100f;
+    public UIManager uiManager;
     
     // Connection info
     public int port;
@@ -19,7 +22,7 @@ public class CubeEntity
     public bool isBot;
     public int id;
     public float gunRange = 100f;
-    public float gunDamage = 50f;
+    public float gunDamage = 10f;
     private Cooldown shootingCooldown;
     
     public CubeEntity(GameObject go, int id, bool isBot = false)
@@ -29,7 +32,8 @@ public class CubeEntity
         port = Utils.GetPortFromId(id);
         this.isBot = isBot;
         points = 0;
-        shootingCooldown = new Cooldown(1f, true);
+        shootingCooldown = new Cooldown(.2f, true);
+        uiManager = null;
     }
 
     public CubeEntity(Vector3 position, Quaternion rotation, GameObject go)
@@ -42,6 +46,7 @@ public class CubeEntity
         isBot = false;
         points = 0;
         shootingCooldown = new Cooldown(1f, true);
+        uiManager = null;
     }
     
     public CubeEntity(CubeEntity original)
@@ -53,6 +58,13 @@ public class CubeEntity
         port = original.port;
         points = original.points;
         shootingCooldown = original.shootingCooldown;
+        uiManager = original.uiManager;
+    }
+
+    public void SetUIManager(UIManager uiManager, String name, float health)
+    {
+        this.uiManager = uiManager;
+        this.uiManager.SetUI(name, health);
     }
 
     public void Serialize(BitBuffer buffer)
@@ -67,6 +79,9 @@ public class CubeEntity
         buffer.PutFloat(rotation.y);
         buffer.PutFloat(rotation.z);
         buffer.PutFloat(health);
+        buffer.PutInt(points);
+        
+        if(uiManager != null) uiManager.UpdateHealthUI(health);
     }
     
     public void Deserialize(BitBuffer buffer) {
@@ -80,6 +95,9 @@ public class CubeEntity
         rotation.y = buffer.GetFloat();
         rotation.z = buffer.GetFloat();
         health = buffer.GetFloat();
+        points = buffer.GetInt();
+        
+        if(uiManager != null) uiManager.UpdateHealthUI(health);
     }
 
     public static CubeEntity createInterpolated(CubeEntity previous, CubeEntity next, float t)

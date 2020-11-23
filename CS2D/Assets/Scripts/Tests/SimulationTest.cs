@@ -29,9 +29,9 @@ public class SimulationTest : MonoBehaviour
             que el follow de la camara sea mas smooth,
             
             sonido de bala y muerte,
-            efecto de disparo, 
-            efecto de daño (ese coloreo rojo con lerp y timer seria ideal), 
-            key para salto y plataformas, 
+            efecto de disparo,
+            efecto de daño (ese coloreo rojo con lerp y timer seria ideal),
+            key para salto y agregar plataformas?,
             mejor modelo de tanque
 
             en cliente modificar ip con input text, todo: hecho pero guarda porque para hacerlo bien deberias saber el ip de cada client (pensa que el Utils.Send lo usan tanto client como server)

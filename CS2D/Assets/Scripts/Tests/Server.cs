@@ -152,13 +152,13 @@ public class Server : MonoBehaviour
         var canvas = Instantiate(playerUICanvas, new Vector3(), Quaternion.identity);
         canvas.transform.SetParent(cubeGO.transform);
         canvas.transform.localPosition = new Vector3(0f, 2f, 0f);
-        var text = canvas.GetComponentInChildren<Text>();
-        if(text != null) text.text = $"{id}";
         
         cubeGO.transform.SetParent(GameObject.Find("Players(Server)").transform);
         cubeGO.name = $"player-{id}";
         var newCube = new CubeEntity(cubeGO, id, isBot);
         cubeEntitiesServer[newCube.id] = newCube;
+
+        newCube.SetUIManager(canvas.GetComponent<UIManager>(), $"{id}", 1f);
         if(isBot) {
             bots[newCube.id] = newCube; // store bots in another list to test applying movement to them
         }
@@ -208,7 +208,7 @@ public class Server : MonoBehaviour
     {
         foreach (var kv in bots)
         {
-            var command = new Commands(Time.frameCount, 1, 0.2f, null);
+            var command = new Commands(Time.frameCount, 1, 0.2f, null, false);
         
             var packet = Packet.Obtain();
             packet.buffer.PutInt((int) Utils.Ports.INPUT);
@@ -234,7 +234,6 @@ public class Server : MonoBehaviour
             float health = matchingCube.TakeDamage(damage);
             if (health <= 0f)
             {
-                print($"cube {matchingCube.id} is now dead"); 
                 foreach (var kv in cubeEntitiesServer)
                 {
                     var packet = Packet.Obtain();
@@ -248,13 +247,9 @@ public class Server : MonoBehaviour
                 cubeEntitiesServer[shooterId].points += 1; // award shooter a point
                 matchingCube.health = 100f; // restore health
                 matchingCube.GO.transform.position = Utils.waitRoomPos; // tp to wait room
-                print($"Killed {cubeName}. Respawining in 10 seconds");
+                print($"{matchingCube.id} was killed by {shooterId}. Respawining in 10 seconds");
                 StartCoroutine(RespawnPlayer(matchingCube));
             }
-        }
-        else
-        {
-            print("no match");
         }
     }
 

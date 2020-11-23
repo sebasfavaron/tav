@@ -164,11 +164,6 @@ public class Client : MonoBehaviour
         }
 
         // 3. Apply reconciliate position and rotation to client (todo: maybe only do it if difference between clientCube and reconClientCube is greater than THRESHOLD)
-        // var step = Vector3.Distance(clientCube.cubeGameObject.transform.position,
-        //     reconciliateClientCube.cubeGameObject.transform.position);
-        // if (step > 0f) print(step);
-        // if (step > 0.5f) print("something wrong");
-        
         clientCube.GO.transform.position = reconciliateClientCube.GO.transform.position;
         clientCube.GO.transform.rotation = reconciliateClientCube.GO.transform.rotation;
     }
@@ -197,8 +192,9 @@ public class Client : MonoBehaviour
         var timeout = Time.time + 2f;
         var rotate = Input.GetAxis("Horizontal");
         var forwards = Input.GetAxis("Vertical");
+        var jump = Input.GetKey(KeyCode.K);
         var hitPackage = Input.GetKey(KeyCode.Space) ? clientCube.Shoot() : null;
-        var command = new Commands(inputNumber, forwards, rotate, hitPackage, timeout);
+        var command = new Commands(inputNumber, forwards, rotate, hitPackage, jump, timeout);
         
         commands.Add(command);
         inputNumber++;
@@ -294,12 +290,12 @@ public class Client : MonoBehaviour
         
         var cubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
         cubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
-    
-        // Attach label on top of his head
-        AddLabelToCube(cubeGO, receivedId);
-
+        
         var cube = new CubeEntity(cubeGO, receivedId);
         cubeEntitiesClient[cube.id] = cube;
+
+        // Attach label on top of his head
+        AddUIToCube(cube, receivedId);
 
         // Check if player joined is this client (server confirmation that I'm joined)
         if (receivedId == clientId)
@@ -326,8 +322,6 @@ public class Client : MonoBehaviour
                 if (!cubeEntitiesClient.ContainsKey(newCubeId))
                 {
                     var newCubeGO = Instantiate(clientCubePrefab, Utils.startPos, Quaternion.identity);
-                    AddLabelToCube(newCubeGO, newCubeId);
-                    
                     newCubeGO.name = $"player-{newCubeId}";
                     print($"adding {newCubeGO.name}");
                     newCubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
@@ -335,6 +329,8 @@ public class Client : MonoBehaviour
                     var newCube = new CubeEntity(newCubeGO, newCubeId);
                     newCube.Deserialize(packet.buffer);
                     cubeEntitiesClient[newCubeId] = newCube;
+
+                    AddUIToCube(newCube, newCubeId);
                 }
             }
 
@@ -348,13 +344,27 @@ public class Client : MonoBehaviour
         }
     }
 
-    private void AddLabelToCube(GameObject cubeGO, int cubeId)
+    private void AddUIToCube(CubeEntity cube, int cubeId)
     {
         var canvas = Instantiate(playerUICanvas, new Vector3(), Quaternion.identity);
-        canvas.transform.SetParent(cubeGO.transform);
+        canvas.transform.SetParent(cube.GO.transform);
         canvas.transform.localPosition = new Vector3(0f, 2f, 0f);
-        var text = canvas.GetComponentInChildren<Text>();
-        if(text != null) text.text = $"{cubeId}";
+        cube.SetUIManager(canvas.GetComponent<UIManager>(), $"{cubeId}", 1f);
+        // var healthBar = canvas.GetComponent<HealthBar>();
+        // if (healthBar != null)
+        // {
+        //     var healthBarComp = healthBar.GetComponent<HealthBar>();
+        //     if(healthBarComp != null) cube.SetHealthBar(healthBarComp);
+        //     else
+        //     {
+        //         print("mini not");
+        //         cube.SetHealthBar(healthBar);
+        //     }
+        // }
+        // else
+        // {
+        //     print("not");
+        // }
     }
 
     private void PlayerDied(Packet packet)

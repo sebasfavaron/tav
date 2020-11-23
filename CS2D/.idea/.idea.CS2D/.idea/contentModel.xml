@@ -51,6 +51,7 @@
             <e p="CubeEntity.cs" t="Include" />
             <e p="FakeChannel.cs" t="Include" />
             <e p="GameManager.cs" t="Include" />
+            <e p="HealthBar.cs" t="Include" />
             <e p="HitPackage.cs" t="Include" />
             <e p="Server.cs" t="Include" />
             <e p="SimulationTest.cs" t="Include" />
@@ -64,6 +65,7 @@
             <e p="Utils.cs" t="Include" />
           </e>
         </e>
+        <e p="UIManager.cs" t="Include" />
       </e>
       <e p="CS2D.sln" t="IncludeFlat" />
       <e p="IngameDebugConsole.Editor.csproj" t="IncludeRecursive" />

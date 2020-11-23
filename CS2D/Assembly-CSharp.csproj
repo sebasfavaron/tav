@@ -73,6 +73,7 @@
      <Compile Include="Assets\Scripts\Tests\CubeEntity.cs" />
      <Compile Include="Assets\Scripts\Tests\FakeChannel.cs" />
      <Compile Include="Assets\Scripts\Tests\GameManager.cs" />
+     <Compile Include="Assets\Scripts\Tests\HealthBar.cs" />
      <Compile Include="Assets\Scripts\Tests\HitPackage.cs" />
      <Compile Include="Assets\Scripts\Tests\Server.cs" />
      <Compile Include="Assets\Scripts\Tests\SimulationTest.cs" />
@@ -82,6 +83,7 @@
      <Compile Include="Assets\Scripts\Utils\LoadScenes.cs" />
      <Compile Include="Assets\Scripts\Utils\NumberUtils.cs" />
      <Compile Include="Assets\Scripts\Utils\Utils.cs" />
+     <Compile Include="Assets\UIManager.cs" />
  <Reference Include="Unity.Timeline.Editor">
  <HintPath>D:/itba/tav (tecnicas avanzadas de videojuegos)/tav (sebas)/CS2D/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
  </Reference>

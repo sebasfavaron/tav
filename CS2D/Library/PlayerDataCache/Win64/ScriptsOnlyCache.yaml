@@ -4,8 +4,10 @@ ScriptsOnlyBuild:
     - CameraFollow
     - Client
     - GameManager
+    - HealthBar
     - LoadScenes
     - Server
+    - UIManager
     IngameDebugConsole.Runtime.dll:
     - IngameDebugConsole.DebugLogItem
     - IngameDebugConsole.DebugLogManager
@@ -13,8 +15,6 @@ ScriptsOnlyBuild:
     - IngameDebugConsole.DebugLogRecycledListView
     - IngameDebugConsole.DebugLogResizeListener
     - IngameDebugConsole.DebugsOnScrollListener
-    Unity.Rider.Editor.dll:
-    - Packages.Rider.Editor.RiderScriptEditorData
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
     - UnityEditor.TestTools.TestRunner.TestListCacheData
@@ -69,17 +69,25 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9682}
     - Class: 114
-      Script: {instanceID: 9864}
+      Script: {instanceID: 9862}
     - Class: 114
-      Script: {instanceID: 10350}
+      Script: {instanceID: 9912}
     - Class: 114
-      Script: {instanceID: 10482}
+      Script: {instanceID: 10340}
     - Class: 114
-      Script: {instanceID: 10648}
+      Script: {instanceID: 10470}
     - Class: 114
-      Script: {instanceID: 11360}
+      Script: {instanceID: 10630}
     - Class: 114
-      Script: {instanceID: 11764}
+      Script: {instanceID: 11338}
+    - Class: 114
+      Script: {instanceID: 11736}
+    - Class: 114
+      Script: {instanceID: 11772}
+    - Class: 114
+      Script: {instanceID: 13910}
+    - Class: 114
+      Script: {instanceID: 37508}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -89,6 +97,8 @@ ScriptsOnlyBuild:
     - Class: 143
       Script: {instanceID: 0}
     - Class: 157
+      Script: {instanceID: 0}
+    - Class: 213
       Script: {instanceID: 0}
     - Class: 222
       Script: {instanceID: 0}
@@ -128,15 +138,23 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9682}
     - Class: 114
-      Script: {instanceID: 9864}
+      Script: {instanceID: 9862}
     - Class: 114
-      Script: {instanceID: 10350}
+      Script: {instanceID: 9912}
     - Class: 114
-      Script: {instanceID: 11360}
+      Script: {instanceID: 10340}
     - Class: 114
-      Script: {instanceID: 11494}
+      Script: {instanceID: 11338}
     - Class: 114
-      Script: {instanceID: 11764}
+      Script: {instanceID: 11472}
+    - Class: 114
+      Script: {instanceID: 11736}
+    - Class: 114
+      Script: {instanceID: 11772}
+    - Class: 114
+      Script: {instanceID: 13910}
+    - Class: 114
+      Script: {instanceID: 37508}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -146,6 +164,8 @@ ScriptsOnlyBuild:
     - Class: 143
       Script: {instanceID: 0}
     - Class: 157
+      Script: {instanceID: 0}
+    - Class: 213
       Script: {instanceID: 0}
     - Class: 222
       Script: {instanceID: 0}
@@ -183,69 +203,69 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9682}
     - Class: 114
+      Script: {instanceID: 9862}
+    - Class: 114
       Script: {instanceID: 9864}
     - Class: 114
-      Script: {instanceID: 9866}
-    - Class: 114
-      Script: {instanceID: 9914}
+      Script: {instanceID: 9912}
     - Class: 114
       Script: {instanceID: 10044}
     - Class: 114
       Script: {instanceID: 10132}
     - Class: 114
-      Script: {instanceID: 10350}
+      Script: {instanceID: 10340}
     - Class: 114
-      Script: {instanceID: 10426}
+      Script: {instanceID: 10416}
     - Class: 114
-      Script: {instanceID: 10484}
+      Script: {instanceID: 10472}
     - Class: 114
-      Script: {instanceID: 10556}
+      Script: {instanceID: 10538}
     - Class: 114
-      Script: {instanceID: 10642}
+      Script: {instanceID: 10624}
     - Class: 114
-      Script: {instanceID: 10690}
+      Script: {instanceID: 10672}
     - Class: 114
-      Script: {instanceID: 10796}
+      Script: {instanceID: 10778}
     - Class: 114
-      Script: {instanceID: 10876}
+      Script: {instanceID: 10858}
     - Class: 114
-      Script: {instanceID: 10904}
+      Script: {instanceID: 10886}
     - Class: 114
-      Script: {instanceID: 11026}
+      Script: {instanceID: 11006}
     - Class: 114
-      Script: {instanceID: 11054}
+      Script: {instanceID: 11034}
     - Class: 114
-      Script: {instanceID: 11176}
+      Script: {instanceID: 11156}
     - Class: 114
-      Script: {instanceID: 11276}
+      Script: {instanceID: 11256}
     - Class: 114
-      Script: {instanceID: 11360}
+      Script: {instanceID: 11338}
     - Class: 114
-      Script: {instanceID: 11578}
+      Script: {instanceID: 11556}
     - Class: 114
-      Script: {instanceID: 11692}
+      Script: {instanceID: 11666}
     - Class: 114
-      Script: {instanceID: 11726}
+      Script: {instanceID: 11698}
     - Class: 114
-      Script: {instanceID: 11764}
+      Script: {instanceID: 11736}
     - Class: 114
-      Script: {instanceID: 11802}
+      Script: {instanceID: 11772}
     - Class: 114
-      Script: {instanceID: 14082}
+      Script: {instanceID: 17782}
     - Class: 114
-      Script: {instanceID: 14086}
+      Script: {instanceID: 17786}
     - Class: 114
-      Script: {instanceID: 14090}
+      Script: {instanceID: 17802}
     - Class: 114
-      Script: {instanceID: 14094}
+      Script: {instanceID: 17808}
     - Class: 114
-      Script: {instanceID: 14098}
+      Script: {instanceID: 17812}
     - Class: 114
-      Script: {instanceID: 14114}
+      Script: {instanceID: 17816}
     - Class: 114
-      Script: {instanceID: 14186}
+      Script: {instanceID: 17832}
     - Class: 114
-      Script: {instanceID: 17992}
+      Script: {instanceID: 17974}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -1075,6 +1095,18 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: PlayableTrack
+  - hash:
+      serializedVersion: 2
+      Hash: 890895da721fcae149fb8910f6a54954
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: HealthBar
+  - hash:
+      serializedVersion: 2
+      Hash: 31e06ca1e68b4d21ac579bb2ccf54ac4
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: UIManager
   platform: 19
   scenePathNames:
   - Assets/Scene/StartMenu.unity
