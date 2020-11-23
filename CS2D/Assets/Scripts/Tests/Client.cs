@@ -24,6 +24,7 @@ public class Client : MonoBehaviour
     [SerializeField] private GameObject clientCubePrefab;
     [SerializeField] private GameObject clientReconciliateCubePrefab;
     [SerializeField] private GameObject playerUICanvas;
+    private GeneralUIManager UICanvas;
     private Dictionary<int, CubeEntity> cubeEntitiesClient;
 
     List<Snapshot> interpolationBuffer = new List<Snapshot>();
@@ -44,6 +45,7 @@ public class Client : MonoBehaviour
         channel = new Channel(Utils.GetPortFromId(clientId));
         GameObject.Find("Players(Client)").transform.position = Vector3.zero;
         print($"IPAddress: {GameManager.IPAddress}");
+        UICanvas = GameObject.Find("UICanvas").GetComponent<GeneralUIManager>();
     }
 
     private void FixedUpdate()
@@ -92,6 +94,8 @@ public class Client : MonoBehaviour
                     break;
             }
         }
+        
+        if(clientCube != null) UICanvas.SetUI(clientCube.points);
     }
     
     private void AckInputs(Packet packet)

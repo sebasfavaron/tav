@@ -25,7 +25,6 @@ public class SimulationTest : MonoBehaviour
         TODO: el bot queda en el aire, parece que nadie lo actualiza
         
         todo:
-            Mostrar puntos y vida en client con GUI,
             que el follow de la camara sea mas smooth,
             
             sonido de bala y muerte,
