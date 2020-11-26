@@ -508,7 +508,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pps: 60
-  serverCubePrefab: {fileID: 53744870109099055, guid: 4a2c160efb06cf742a60b12372836b60,
+  serverCubePrefab: {fileID: 6511893666160898004, guid: a2fc8dd3b2b068e4eb1e8463cd6ab417,
     type: 3}
   playerUICanvas: {fileID: 4352899645653780564, guid: 3e363928103a1c4409a45ec252c806df,
     type: 3}

@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
 {
     public static string IPAddress = "127.0.0.1";
     public static int clientId = -1;
+    public static GameObject laserPrefab;
 
     private void Start()
     {

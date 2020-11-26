@@ -13,11 +13,13 @@ public class Server : MonoBehaviour
     
     [SerializeField] private GameObject serverCubePrefab;
     [SerializeField] private GameObject playerUICanvas;
+    [SerializeField] private GameObject laserPrefab;
     private Dictionary<int, CubeEntity> cubeEntitiesServer;
     private Dictionary<int, CubeEntity> bots;
     private List<int> idsUsed;
     private Dictionary<int, int> packetNumbers; // packetNumbers[cubeId] = cubePacketNumber
     private Dictionary<int, int> maxInputs; // maxInputs[cubeId] = cubeMaxInput
+    private List<Bullet> frameBullets;
 
     // Start is called before the first frame update
     public void Start()
@@ -29,6 +31,8 @@ public class Server : MonoBehaviour
         idsUsed = new List<int>();
         packetNumbers = new Dictionary<int, int>();
         maxInputs = new Dictionary<int, int>();
+        GameManager.laserPrefab = laserPrefab;
+        frameBullets = new List<Bullet>();
         InvokeRepeating(nameof(BotRandomMove), 1f, 0.01f);
     }
 
@@ -49,6 +53,7 @@ public class Server : MonoBehaviour
             }
         }
 
+        frameBullets = new List<Bullet>(); // empty bullets from previous frame
         Packet packet;
         while ((packet = channel.GetPacket()) != null)
         {
@@ -85,12 +90,21 @@ public class Server : MonoBehaviour
                 Vector3 move = _transform.forward * command.forwards + Vector3.down * Utils.gravity;
                 cubeGO.GetComponent<CharacterController>().Move(move * (Utils.speed * Time.deltaTime));
                 _transform.Rotate(new Vector3(0f, command.rotate * (Utils.rotateSpeed * Time.deltaTime), 0f));
-                
-                if (!command.hitPackage.hitName.Equals(""))
+
+                if (command.shoot)
                 {
-                    print($"{cube.id} hit {command.hitPackage.hitName} and did {command.hitPackage.damage} damage");
-                    TakeDamage(command.hitPackage.hitName, command.hitPackage.damage, cube.id);
+                    print("server got shoot command");
+                    frameBullets.Add(new Bullet(cubeGO.transform.position, cubeGO.transform.forward, cubeGO.transform.rotation));
+                    // cube.Shoot(justDraw:true);
                 }
+                command.hitPackages.ForEach(hitPackage =>
+                {
+                    if (!hitPackage.hitName.Equals(""))
+                    {
+                        print($"{cube.id} hit {hitPackage.hitName} and did {hitPackage.damage} damage");
+                        TakeDamage(hitPackage.hitName, hitPackage.damage, cube.id);
+                    }
+                });
 
                 maxInputs[id] = command.inputNumber;
             }
@@ -136,7 +150,7 @@ public class Server : MonoBehaviour
             // serialize
             var packet = Packet.Obtain();
             packet.buffer.PutInt((int) Utils.Ports.DATA);
-            var snapshot = new Snapshot(cubeEntitiesServer, packetNumbers[cube.id]);
+            var snapshot = new Snapshot(cubeEntitiesServer, packetNumbers[cube.id], frameBullets);
             snapshot.Serialize(packet.buffer);
             packet.buffer.Flush();
             Utils.Send(packet, channel, cube.port);

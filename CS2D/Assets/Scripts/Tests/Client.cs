@@ -47,6 +47,7 @@ public class Client : MonoBehaviour
         GameObject.Find("Players(Client)").transform.position = Vector3.zero;
         print($"IPAddress: {GameManager.IPAddress}");
         UICanvas = GameObject.Find("UICanvas").GetComponent<GeneralUIManager>();
+        GameManager.laserPrefab = laserPrefab;
     }
 
     private void FixedUpdate()
@@ -114,7 +115,7 @@ public class Client : MonoBehaviour
     {
         if(!connected) return;
 
-        var snapshot = new Snapshot(cubeEntitiesClient, -1);
+        var snapshot = new Snapshot(cubeEntitiesClient, -1, new List<Bullet>());
         snapshot.Deserialize(packet.buffer);
 
         int bufferSize = interpolationBuffer.Count;
@@ -148,6 +149,10 @@ public class Client : MonoBehaviour
         var t =  (clientTime - previousTime) / (nextTime - previousTime);
         var interpolatedSnapshot = Snapshot.CreateInterpolated(interpolationBuffer[0], interpolationBuffer[1], t, clientId);
         interpolatedSnapshot.Apply(clientId);
+        interpolationBuffer[0].bullets.ForEach(bullet =>
+        {
+            bullet.Cast();
+        });
         
         if(clientTime > nextTime) {
             interpolationBuffer.RemoveAt(0);
@@ -168,9 +173,9 @@ public class Client : MonoBehaviour
             Apply(command, reconciliateClientCube, reconciliateCharacterController);
         }
 
-        // 3. Apply reconciliate position and rotation to client (todo: maybe only do it if difference between clientCube and reconClientCube is greater than THRESHOLD)
+        // 3. Apply reconciliate position and rotation to client
         clientCube.GO.transform.position = reconciliateClientCube.GO.transform.position;
-        clientCube.GO.transform.rotation = reconciliateClientCube.GO.transform.rotation;
+        clientCube.GO.transform.rotation = reconciliateClientCube.GO.transform.rotation;    
     }
 
     private void ReadStoreApplySendInput()
@@ -197,9 +202,9 @@ public class Client : MonoBehaviour
         var timeout = Time.time + 2f;
         var rotate = Input.GetAxis("Horizontal");
         var forwards = Input.GetAxis("Vertical");
-        var jump = Input.GetKey(KeyCode.K);
-        var hitPackage = Input.GetKey(KeyCode.Space) ? clientCube.Shoot() : null;
-        var command = new Commands(inputNumber, forwards, rotate, hitPackage, jump, timeout);
+        var shoot = Input.GetKey(KeyCode.Space);
+        var hitPackages = shoot ? clientCube.Shoot() : null;
+        var command = new Commands(inputNumber, forwards, rotate, hitPackages, shoot, timeout);
         
         commands.Add(command);
         inputNumber++;
@@ -297,7 +302,6 @@ public class Client : MonoBehaviour
         cubeGO.transform.SetParent(GameObject.Find("Players(Client)").transform);
         
         var cube = new CubeEntity(cubeGO, receivedId);
-        cube.SetLaserPrefab(laserPrefab);
         cubeEntitiesClient[cube.id] = cube;
 
         // Attach label on top of his head
@@ -334,7 +338,6 @@ public class Client : MonoBehaviour
 
                     var newCube = new CubeEntity(newCubeGO, newCubeId);
                     newCube.Deserialize(packet.buffer);
-                    newCube.SetLaserPrefab(laserPrefab);
                     cubeEntitiesClient[newCubeId] = newCube;
 
                     AddUIToCube(newCube, newCubeId);

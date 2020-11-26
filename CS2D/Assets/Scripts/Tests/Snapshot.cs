@@ -9,15 +9,34 @@ public class Snapshot
 {
     public Dictionary<int, CubeEntity> cubeEntities;
     public int packetNumber;
+    public List<Bullet> bullets;
 
-    public Snapshot(Dictionary<int, CubeEntity> cubeEntities, int packetNumber)
+    public Snapshot(Dictionary<int, CubeEntity> cubeEntities, int packetNumber, List<Bullet> bullets)
     {
         this.cubeEntities = cubeEntities;
         this.packetNumber = packetNumber;
+        this.bullets = bullets;
     }
     
     public void Serialize(BitBuffer buffer)
     {
+        buffer.PutInt(bullets.Count);
+        bullets.ForEach(bullet =>
+        {
+            buffer.PutFloat(bullet.position.x);
+            buffer.PutFloat(bullet.position.y);
+            buffer.PutFloat(bullet.position.z);
+            
+            buffer.PutFloat(bullet.forward.x);
+            buffer.PutFloat(bullet.forward.y);
+            buffer.PutFloat(bullet.forward.z);
+
+            buffer.PutFloat(bullet.rotation.x);
+            buffer.PutFloat(bullet.rotation.y);
+            buffer.PutFloat(bullet.rotation.z);
+            buffer.PutFloat(bullet.rotation.w);
+        });
+        
         buffer.PutInt(packetNumber);
         foreach (var kv in cubeEntities)
         {
@@ -28,8 +47,17 @@ public class Snapshot
     
     public void Deserialize(BitBuffer buffer)
     {
+        var bulletCount = buffer.GetInt();
+        for (int i = 0; i < bulletCount; i++)
+        {
+            var pos = new Vector3(buffer.GetFloat(), buffer.GetFloat(), buffer.GetFloat());
+            var fwd = new Vector3(buffer.GetFloat(), buffer.GetFloat(), buffer.GetFloat());
+            var rot = new Quaternion(buffer.GetFloat(), buffer.GetFloat(), buffer.GetFloat(), buffer.GetFloat());
+            bullets.Add(new Bullet(pos, fwd, rot));
+        }
+        
         packetNumber = buffer.GetInt();
-        while (buffer.HasRemaining())  // In case new players haven't been added to the client yet
+        while (buffer.HasRemaining())
         {
             var key = buffer.GetInt();
             cubeEntities[key].Deserialize(buffer);
@@ -50,7 +78,7 @@ public class Snapshot
                 cubeEntities[kv.Key] = CubeEntity.createInterpolated(kv.Value, next.cubeEntities[kv.Key], t);
             }
         }
-        return new Snapshot(cubeEntities, -1);
+        return new Snapshot(cubeEntities, -1, new List<Bullet>());
     }
 
     public void Apply(int clientId)

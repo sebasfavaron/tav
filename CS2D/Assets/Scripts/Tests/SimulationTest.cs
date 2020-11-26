@@ -25,8 +25,6 @@ public class SimulationTest : MonoBehaviour
         TODO: el bot queda en el aire, parece que nadie lo actualiza
         
         todo:
-            que el follow de la camara sea mas smooth,
-            
             sonido de bala y muerte,
             efecto de daño (ese coloreo rojo con lerp y timer seria ideal),
 

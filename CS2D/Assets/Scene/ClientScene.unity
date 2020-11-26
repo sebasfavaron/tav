@@ -722,13 +722,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1201307566}
-  m_LocalRotation: {x: 0.01745245, y: 0, z: 0, w: 0.99984777}
-  m_LocalPosition: {x: 0, y: 8, z: -20}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 500, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 2, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!114 &1201307570
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -743,7 +743,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 0}
   smoothSpeed: 0.1
-  offset: {x: 0, y: 5, z: -12}
+  offset: {x: 0, y: 4, z: -7.5}
 --- !u!1 &1341572676
 GameObject:
   m_ObjectHideFlags: 0
@@ -1059,9 +1059,9 @@ MonoBehaviour:
   pps: 60
   rps: 10
   requiredSnapshots: 5
-  clientCubePrefab: {fileID: 5732492077391170865, guid: 1311777dcb5f1154a84cbc455218c953,
+  clientCubePrefab: {fileID: 5986799894237606421, guid: 08bc423af7701d84bbf558afff10b0a8,
     type: 3}
-  clientReconciliateCubePrefab: {fileID: 220534595683379430, guid: de430e5b95a37294189396c2dd01131b,
+  clientReconciliateCubePrefab: {fileID: 7793433355365826168, guid: 6699295d6cfad1c46a7a093a80e443cf,
     type: 3}
   playerUICanvas: {fileID: 4352899645653780564, guid: 3e363928103a1c4409a45ec252c806df,
     type: 3}

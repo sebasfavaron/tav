@@ -7,7 +7,6 @@
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
         <e p="GeneralUIManager.cs" t="Include" />
-        <e p="laserScript.cs" t="Include" />
         <e p="Scripts" t="Include">
           <e p="IngameDebugConsole" t="Include">
             <e p="Android" t="Include">
@@ -46,6 +45,7 @@
             <e p="Singleton.cs" t="Include" />
           </e>
           <e p="Tests" t="Include">
+            <e p="Bullet.cs" t="Include" />
             <e p="CameraFollow.cs" t="Include" />
             <e p="Client.cs" t="Include" />
             <e p="Commands.cs" t="Include" />
@@ -61,6 +61,7 @@
             <e p="Target.cs" t="Include" />
           </e>
           <e p="Utils" t="Include">
+            <e p="BouceRay.cs" t="Include" />
             <e p="Cooldown.cs" t="Include" />
             <e p="LoadScenes.cs" t="Include" />
             <e p="NumberUtils.cs" t="Include" />

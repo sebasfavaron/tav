@@ -25,7 +25,6 @@ public class CubeEntity
     public float gunDamage = 10f;
     private Cooldown shootingCooldown;
     public UIManager uiManager;
-    public GameObject laser;
         
     public CubeEntity(GameObject go, int id, bool isBot = false)
     {
@@ -67,11 +66,6 @@ public class CubeEntity
     {
         this.uiManager = uiManager;
         this.uiManager.SetUI(name, health);
-    }
-
-    public void SetLaserPrefab(GameObject laser)
-    {
-        this.laser = laser;
     }
 
     public void Serialize(BitBuffer buffer)
@@ -121,6 +115,7 @@ public class CubeEntity
             z = previous.rotation.z + deltaRot.z
         };
         cubeEntity.rotation = rot;
+        
         return cubeEntity;
     }
 
@@ -130,22 +125,40 @@ public class CubeEntity
         GO.transform.rotation = rotation;
     }
     
-    public HitPackage Shoot()
+    public List<HitPackage> Shoot(bool justDraw = false)
     {
         if (!shootingCooldown.IsOver()) return null;  // TODO: aca podria indicarle al usuario que no puede disparar todavia (o mostrar en la UI el remaining cooldown)
         shootingCooldown.RestartCooldown();
 
-        RaycastHit hit;
+        // Draw bullet
         var _transform = GO.transform;
+        var bullet = new Bullet(_transform.position, _transform.forward, _transform.rotation);
+        bullet.Cast();
+        if (justDraw) return null;
+        
+        // Calculate bullet's bounces
         Vector3 originRay = _transform.position + _transform.forward * 0.6f;
-        var ray = new Ray(originRay, _transform.forward);
-        if(laser != null) Object.Instantiate(laser, originRay, _transform.rotation);
-        if (Physics.Raycast(ray, out hit, gunRange))
+        var bounceRay = BounceRay.Cast(originRay, _transform.forward, gunRange);
+        if (bounceRay.contacts.Count != 0)
         {
-            Debug.Log($"shot {hit.transform.name}");
-            return new HitPackage(hit.transform.name, gunDamage);
+            var hitPackages = new List<HitPackage>();
+            bounceRay.contacts.ForEach(c =>
+            {
+                hitPackages.Add(new HitPackage(c.transform.name, gunDamage));
+                Debug.Log($"shot {c.transform.name}");
+            });
+            return hitPackages;
         }
-
+        
+        // Old single ray implementation
+        // RaycastHit hit;
+        // var ray = new Ray(originRay, _transform.forward);
+        // if (Physics.Raycast(ray, out hit, gunRange))
+        // {
+        //     Debug.Log($"shot {hit.transform.name}");
+        //     return new HitPackage(hit.transform.name, gunDamage);
+        // }
+        
         return null;
     }
 

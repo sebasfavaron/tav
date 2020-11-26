@@ -57,7 +57,6 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\GeneralUIManager.cs" />
-     <Compile Include="Assets\laserScript.cs" />
      <Compile Include="Assets\Scripts\Network\BitBuffer.cs" />
      <Compile Include="Assets\Scripts\Network\Channel.cs" />
      <Compile Include="Assets\Scripts\Network\Packet.cs" />
@@ -68,6 +67,7 @@
      <Compile Include="Assets\Scripts\ObjectTypes\PoolableGameObject.cs" />
      <Compile Include="Assets\Scripts\ObjectTypes\PoolObject.cs" />
      <Compile Include="Assets\Scripts\ObjectTypes\Singleton.cs" />
+     <Compile Include="Assets\Scripts\Tests\Bullet.cs" />
      <Compile Include="Assets\Scripts\Tests\CameraFollow.cs" />
      <Compile Include="Assets\Scripts\Tests\Client.cs" />
      <Compile Include="Assets\Scripts\Tests\Commands.cs" />
@@ -81,6 +81,7 @@
      <Compile Include="Assets\Scripts\Tests\SimulationTest.cs" />
      <Compile Include="Assets\Scripts\Tests\Snapshot.cs" />
      <Compile Include="Assets\Scripts\Tests\Target.cs" />
+     <Compile Include="Assets\Scripts\Utils\BouceRay.cs" />
      <Compile Include="Assets\Scripts\Utils\Cooldown.cs" />
      <Compile Include="Assets\Scripts\Utils\LoadScenes.cs" />
      <Compile Include="Assets\Scripts\Utils\NumberUtils.cs" />
