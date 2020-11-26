@@ -16,11 +16,8 @@ ScriptsOnlyBuild:
     - IngameDebugConsole.DebugLogRecycledListView
     - IngameDebugConsole.DebugLogResizeListener
     - IngameDebugConsole.DebugsOnScrollListener
-    Unity.Rider.Editor.dll:
-    - Packages.Rider.Editor.RiderScriptEditorData
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
-    - UnityEditor.TestTools.TestRunner.TestListCacheData
     UnityEngine.UI.dll:
     - UnityEngine.EventSystems.BaseInput
     - UnityEngine.EventSystems.EventSystem
@@ -262,21 +259,21 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 11782}
     - Class: 114
-      Script: {instanceID: 14978}
+      Script: {instanceID: 15206}
     - Class: 114
-      Script: {instanceID: 14982}
+      Script: {instanceID: 15210}
     - Class: 114
-      Script: {instanceID: 14998}
+      Script: {instanceID: 15226}
     - Class: 114
-      Script: {instanceID: 15004}
+      Script: {instanceID: 15232}
     - Class: 114
-      Script: {instanceID: 15008}
+      Script: {instanceID: 15236}
     - Class: 114
-      Script: {instanceID: 15012}
+      Script: {instanceID: 15240}
     - Class: 114
-      Script: {instanceID: 15028}
+      Script: {instanceID: 15256}
     - Class: 114
-      Script: {instanceID: 15170}
+      Script: {instanceID: 15398}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
