@@ -1057,7 +1057,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pps: 60
-  rps: 10
+  rps: 60
   requiredSnapshots: 5
   clientCubePrefab: {fileID: 5986799894237606421, guid: 08bc423af7701d84bbf558afff10b0a8,
     type: 3}

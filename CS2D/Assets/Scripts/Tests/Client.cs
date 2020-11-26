@@ -12,7 +12,9 @@ using Random = UnityEngine.Random;
 public class Client : MonoBehaviour
 {
     public int pps = 60;
-    public float rps = 1; // reconciliates per second
+    public float rps = 60; // reconciliates per second
+    private Cooldown packetsCooldown;
+    private Cooldown reconciliateCooldown;
     private int inputNumber = 0;
     private float clientTime = 0f;
     public int requiredSnapshots = 3;
@@ -30,7 +32,6 @@ public class Client : MonoBehaviour
 
     List<Snapshot> interpolationBuffer = new List<Snapshot>();
     List<Commands> commands = new List<Commands>();
-    List<Commands> reconciliateCommands = new List<Commands>();
     private int clientId;
     private CubeEntity clientCube = null;
     private CharacterController clientCharacterController = null;
@@ -47,11 +48,16 @@ public class Client : MonoBehaviour
         GameObject.Find("Players(Client)").transform.position = Vector3.zero;
         print($"IPAddress: {GameManager.IPAddress}");
         UICanvas = GameObject.Find("UICanvas").GetComponent<GeneralUIManager>();
+        packetsCooldown = new Cooldown(1f/pps);
+        reconciliateCooldown = new Cooldown(1f/rps);
         GameManager.laserPrefab = laserPrefab;
     }
 
     private void FixedUpdate()
     {
+        packetsCooldown.UpdateCooldown();
+        reconciliateCooldown.UpdateCooldown();
+
         foreach (var cube in cubeEntitiesClient.Values)
         {
             cube.UpdateShootingCooldown();
@@ -134,8 +140,13 @@ public class Client : MonoBehaviour
     private void InterpolateAndReconciliate()
     {
         if (interpolationBuffer.Count == 0) return;
+
+        if (reconciliateCooldown.IsOver())
+        {
+            Reconciliate(); // for client
+            reconciliateCooldown.RestartCooldown();
+        }
         
-        Reconciliate(); // for client
         while (interpolationBuffer.Count >= requiredSnapshots && !tempDisconnect)
         {
             Interpolate(); // for other players
@@ -175,7 +186,14 @@ public class Client : MonoBehaviour
 
         // 3. Apply reconciliate position and rotation to client
         clientCube.GO.transform.position = reconciliateClientCube.GO.transform.position;
-        clientCube.GO.transform.rotation = reconciliateClientCube.GO.transform.rotation;    
+        if (Vector3.Distance(reconciliateClientCube.GO.transform.position, clientCube.GO.transform.position) > 0.0001f)
+        {
+        }
+
+        clientCube.GO.transform.rotation = reconciliateClientCube.GO.transform.rotation;
+        if (Quaternion.Angle(reconciliateClientCube.GO.transform.rotation, clientCube.GO.transform.rotation) < 0.0001f)
+        {
+        }
     }
 
     private void ReadStoreApplySendInput()
@@ -204,7 +222,7 @@ public class Client : MonoBehaviour
         var forwards = Input.GetAxis("Vertical");
         var shoot = Input.GetKey(KeyCode.Space);
         var hitPackages = shoot ? clientCube.Shoot() : null;
-        var command = new Commands(inputNumber, forwards, rotate, hitPackages, shoot, timeout);
+        var command = new Commands(inputNumber, forwards, rotate, hitPackages, hitPackages != null, timeout);
         
         commands.Add(command);
         inputNumber++;
@@ -250,8 +268,10 @@ public class Client : MonoBehaviour
     
     private void SendInputs()
     {
-        if (commands.Count != 0)
+        if (commands.Count != 0 && packetsCooldown.IsOver())
         {
+            packetsCooldown.RestartCooldown();
+            
             var packet = Packet.Obtain();
             packet.buffer.PutInt((int) Utils.Ports.INPUT);
             packet.buffer.PutInt(clientId);

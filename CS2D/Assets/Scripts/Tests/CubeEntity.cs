@@ -22,7 +22,7 @@ public class CubeEntity
     public bool isBot;
     public int id;
     public float gunRange = 100f;
-    public float gunDamage = 10f;
+    public float gunDamage = 40f;
     private Cooldown shootingCooldown;
     public UIManager uiManager;
         
@@ -33,7 +33,7 @@ public class CubeEntity
         port = Utils.GetPortFromId(id);
         this.isBot = isBot;
         points = 0;
-        shootingCooldown = new Cooldown(.2f, true);
+        shootingCooldown = new Cooldown(.75f, true);
         uiManager = null;
     }
 
@@ -46,7 +46,7 @@ public class CubeEntity
         port = -1;
         isBot = false;
         points = 0;
-        shootingCooldown = new Cooldown(1f, true);
+        shootingCooldown = new Cooldown(.75f, true);
         uiManager = null;
     }
     
@@ -127,8 +127,12 @@ public class CubeEntity
     
     public List<HitPackage> Shoot(bool justDraw = false)
     {
-        if (!shootingCooldown.IsOver()) return null;  // TODO: aca podria indicarle al usuario que no puede disparar todavia (o mostrar en la UI el remaining cooldown)
+        if (!shootingCooldown.IsOver()) {
+            return null;  // TODO: aca podria indicarle al usuario que no puede disparar todavia (o mostrar en la UI el remaining cooldown)
+        }
         shootingCooldown.RestartCooldown();
+
+        Debug.Log($"shooting {shootingCooldown.RemainingCooldown()}");
 
         // Draw bullet
         var _transform = GO.transform;
