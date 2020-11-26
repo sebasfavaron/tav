@@ -21,7 +21,7 @@ public class CubeEntity
     public GameObject GO;
     public bool isBot;
     public int id;
-    public float gunRange = 40f;
+    public float gunRange = 47f;
     public float gunDamage = 70f;
     private Cooldown shootingCooldown;
     public UIManager uiManager;
