@@ -616,7 +616,7 @@ ScriptsOnlyBuild:
     className: CinemachinePOV
   - hash:
       serializedVersion: 2
-      Hash: 7c4d61ba679beaa5d71821c8c9d31078
+      Hash: 4c1d228a22d1defad7181c5e4e6ed80d
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: CameraFollow

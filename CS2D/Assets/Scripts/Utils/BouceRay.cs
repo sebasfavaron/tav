@@ -37,6 +37,9 @@ public class BounceRay
             // Get the final position.
             Vector3 finalPosition = hitSucceeded ? hit.point : position + direction.normalized * magnitude;
  
+            // Draw final position.
+            // Debug.DrawLine(position, finalPosition, Color.green);
+ 
             // If the bounce conditions are met, add another bounce.
             if (hitSucceeded && magnitudeRemaining)
             {
